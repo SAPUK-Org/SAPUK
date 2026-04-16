@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 const BACKEND_API_URL =
   process.env.BACKEND_API_URL || "http://localhost:9090/api";
 
+function rewriteAuthCookiePath(setCookie: string): string {
+  return setCookie.replace(/Path=\/api\/auth/gi, "Path=/api/db/auth");
+}
+
 /**
  * Login – proxy to backend POST /api/auth/login
  *
@@ -52,7 +56,7 @@ export async function POST(req: Request) {
     // Forward refreshToken cookie from backend -> browser
     const setCookie = backendRes.headers.get("set-cookie");
     if (setCookie) {
-      res.headers.set("set-cookie", setCookie);
+      res.headers.set("set-cookie", rewriteAuthCookiePath(setCookie));
     }
 
     return res;

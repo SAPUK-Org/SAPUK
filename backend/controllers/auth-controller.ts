@@ -25,6 +25,12 @@ export const login = async (
       return res.status(401).send({ msg: "Invalid email or password" });
     }
 
+    if (!user.is_active) {
+      return res.status(403).send({
+        msg: "Your account is inactive. Please contact an administrator.",
+      });
+    }
+
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       return res.status(401).send({ msg: "Invalid email or password" });
@@ -88,13 +94,40 @@ export const refreshToken = async (
     let decoded: JwtPayload;
     try {
       decoded = jwt.verify(tokenFromCookie, refreshSecret) as JwtPayload;
-    } catch {
-      return res.status(401).send({ msg: "Invalid or expired refresh token" });
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        return res
+          .status(401)
+          .send({ msg: "Refresh token expired. Please sign in again." });
+      }
+      return res
+        .status(401)
+        .send({ msg: "Invalid refresh token. Please sign in again." });
     }
 
     const user = await selectUserById(decoded.userId);
     if (!user) {
-      return res.status(401).send({ msg: "User not found" });
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/api/auth",
+      });
+      return res
+        .status(401)
+        .send({ msg: "Session user no longer exists. Please sign in again." });
+    }
+
+    if (!user.is_active) {
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/api/auth",
+      });
+      return res.status(403).send({
+        msg: "Your account is inactive. Please contact an administrator.",
+      });
     }
 
     const payload: JwtPayload = {

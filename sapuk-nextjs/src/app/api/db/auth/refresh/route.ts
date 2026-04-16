@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 const BACKEND_API_URL =
   process.env.BACKEND_API_URL || "http://localhost:9090/api";
 
+function rewriteAuthCookiePath(setCookie: string): string {
+  return setCookie.replace(/Path=\/api\/auth/gi, "Path=/api/db/auth");
+}
+
 /**
  * Refresh access token – proxy to backend POST /api/auth/refresh
  *
@@ -44,16 +48,15 @@ export async function POST(req: Request) {
     // Forward any updated refreshToken cookie from backend
     const setCookie = backendRes.headers.get("set-cookie");
     if (setCookie) {
-      res.headers.set("set-cookie", setCookie);
+      res.headers.set("set-cookie", rewriteAuthCookiePath(setCookie));
     }
 
     return res;
   } catch (error) {
-    console.error("Error in /api/db/auth/refresh POST:", error);
+    console.error("Error whilst refreshing access token:", error);
     return NextResponse.json(
       { success: false, message: "An unexpected error occurred" },
       { status: 500 },
     );
   }
 }
-

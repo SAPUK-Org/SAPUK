@@ -14,12 +14,23 @@ export const requireAuth = async (
 ) => {
   try {
     const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith("Bearer ")
-      ? authHeader.slice(7)
-      : undefined;
+    if (!authHeader) {
+      return res.status(401).send({
+        msg: "Missing Authorization header. Please sign in and try again.",
+      });
+    }
 
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(401).send({
+        msg: "Malformed Authorization header. Expected format: Bearer <token>.",
+      });
+    }
+
+    const token = authHeader.slice(7).trim();
     if (!token) {
-      return res.status(401).send({ msg: "Authentication required" });
+      return res.status(401).send({
+        msg: "Bearer token is empty. Please sign in and try again.",
+      });
     }
 
     const secret = process.env.JWT_SECRET;
@@ -30,13 +41,33 @@ export const requireAuth = async (
     let decoded: JwtPayload;
     try {
       decoded = jwt.verify(token, secret) as JwtPayload;
-    } catch {
-      return res.status(401).send({ msg: "Invalid or expired token" });
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        return res
+          .status(401)
+          .send({ msg: "Access token expired. Please refresh your session." });
+      }
+      if (error instanceof jwt.JsonWebTokenError) {
+        return res.status(401).send({
+          msg: "Invalid access token. Please sign in again.",
+        });
+      }
+      return res
+        .status(401)
+        .send({ msg: "Unable to verify access token. Please sign in again." });
     }
 
     const user = await selectUserById(decoded.userId);
     if (!user) {
-      return res.status(401).send({ msg: "User not found" });
+      return res
+        .status(401)
+        .send({ msg: "Session user not found. Please sign in again." });
+    }
+
+    if (!user.is_active) {
+      return res.status(403).send({
+        msg: "Your account is inactive. Please contact an administrator.",
+      });
     }
 
     req.user = sanitizeUser(user as User);
@@ -182,7 +213,9 @@ export const requireValidUploadSecret = async (
     return res.status(500).send({ msg: "Server configuration error" });
   }
   if (!secret || secret !== expected) {
-    return res.status(401).send({ msg: "Authentication required" });
+    return res.status(401).send({
+      msg: "Invalid upload callback secret. Authentication required.",
+    });
   }
   next();
 };

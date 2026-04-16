@@ -33,6 +33,8 @@ type AuthContextValue = AuthState & {
 
 const STORAGE_KEY_TOKEN = "sapuk_auth_token";
 const STORAGE_KEY_USER = "sapuk_auth_user";
+const AUTH_TOKEN_UPDATED_EVENT = "sapuk:auth-token-updated";
+const AUTH_CLEARED_EVENT = "sapuk:auth-cleared";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -83,6 +85,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       isLoading: false,
     }));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const onTokenUpdated = (event: Event) => {
+      const token = (event as CustomEvent<{ token?: string }>).detail?.token;
+      if (!token) return;
+      setState((prev) => ({ ...prev, token }));
+    };
+
+    const onAuthCleared = () => {
+      setState({ user: null, token: null, isLoading: false });
+    };
+
+    window.addEventListener(AUTH_TOKEN_UPDATED_EVENT, onTokenUpdated);
+    window.addEventListener(AUTH_CLEARED_EVENT, onAuthCleared);
+    return () => {
+      window.removeEventListener(AUTH_TOKEN_UPDATED_EVENT, onTokenUpdated);
+      window.removeEventListener(AUTH_CLEARED_EVENT, onAuthCleared);
+    };
   }, []);
 
   const login = useCallback((user: AuthUser, token: string) => {

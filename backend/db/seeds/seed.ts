@@ -1,0 +1,221 @@
+import bcrypt from "bcrypt";
+import db from "../connection";
+import format from "pg-format";
+import { SeedData } from "../../types";
+import { events } from "../data/test-data/events";
+import { crisis_resources } from "../data/test-data/crisis-resources";
+import { useful_links } from "../data/test-data/useful-links";
+import { notes } from "../data/test-data/notes";
+import { note_comments } from "../data/test-data/note-comments";
+
+const seed = async ({ users }: SeedData) => {
+  try {
+    await db.query("DROP TABLE IF EXISTS audit_logs CASCADE");
+    await db.query("DROP TABLE IF EXISTS note_comments CASCADE");
+    await db.query("DROP TABLE IF EXISTS notes CASCADE");
+    await db.query("DROP TABLE IF EXISTS useful_links CASCADE");
+    await db.query("DROP TABLE IF EXISTS crisis_resources CASCADE");
+    await db.query("DROP TABLE IF EXISTS resources CASCADE");
+    await db.query("DROP TABLE IF EXISTS events CASCADE");
+    await db.query("DROP TABLE IF EXISTS users CASCADE");
+
+    await db.query("DROP TYPE IF EXISTS resource_type");
+    await db.query("DROP TYPE IF EXISTS staff_role");
+
+    await db.query(
+      "CREATE TYPE staff_role AS ENUM ('admin', 'editor', 'staff')",
+    );
+    await db.query(
+      "CREATE TYPE resource_type AS ENUM ('image', 'document', 'video', 'other')",
+    );
+
+    // Create tables
+    await db.query(`
+      CREATE TABLE users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        profile_picture TEXT,
+        password_hash TEXT NOT NULL,
+        role staff_role DEFAULT 'staff' NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE events (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        cover_image TEXT,
+        dates_description TEXT,
+        starts_at TIMESTAMP WITH TIME ZONE,
+        ends_at TIMESTAMP WITH TIME ZONE,
+        location TEXT NOT NULL,
+        type TEXT NOT NULL,
+        max_volunteers INTEGER DEFAULT NULL,
+        created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE resources (
+        id SERIAL PRIMARY KEY,
+        url TEXT NOT NULL,
+        mime_type TEXT NOT NULL,
+        resource_type resource_type NOT NULL,
+        file_name TEXT NOT NULL,
+        file_key TEXT,
+        uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        attachable_type TEXT,
+        attachable_id INTEGER,
+        metadata JSONB,
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE crisis_resources (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        phone_or_url TEXT NOT NULL,
+        description TEXT,
+        hours TEXT,
+        type TEXT NOT NULL,
+        sort_order INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE useful_links (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        url TEXT NOT NULL,
+        description TEXT,
+        sort_order INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE NOT NULL,
+        metadata JSONB,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE notes (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE note_comments (
+        id SERIAL PRIMARY KEY,
+        note_id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
+        author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE audit_logs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        action TEXT NOT NULL,
+        resource_type TEXT NOT NULL,
+        resource_id INTEGER,
+        method TEXT,
+        route TEXT,
+        status_code INT,
+        metadata JSONB,
+        ip TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
+    // Insert users into the `users` table (hash passwords before insert)
+    const insertUsersQueryString = format(
+      `INSERT INTO users (username, email, profile_picture, password_hash, role, is_active) VALUES %L RETURNING id`,
+      users.map((user) => [
+        user.username,
+        user.email,
+        user.profile_picture ?? null,
+        bcrypt.hashSync(user.password_hash, 10),
+        user.role,
+        user.is_active,
+      ]),
+    );
+    await db.query(insertUsersQueryString);
+
+    const insertEventsQueryString = format(
+      `INSERT INTO events (title, description, cover_image, dates_description, starts_at, ends_at, location, type, max_volunteers, created_by) VALUES %L RETURNING id`,
+      events.map((event) => [
+        event.title,
+        event.description,
+        event.cover_image ?? null,
+        event.dates_description ?? null,
+        event.starts_at ?? null,
+        event.ends_at ?? null,
+        event.location,
+        event.type,
+        event.max_volunteers ?? null,
+        event.created_by,
+      ]),
+    );
+    await db.query(insertEventsQueryString);
+
+    const insertCrisisResourcesQueryString = format(
+      `INSERT INTO crisis_resources (name, phone_or_url, hours, type, sort_order, is_active) VALUES %L RETURNING id`,
+      crisis_resources.map((crisisResource) => [
+        crisisResource.name,
+        crisisResource.phone_or_url,
+        crisisResource.hours,
+        crisisResource.type,
+        crisisResource.sort_order ?? null,
+        crisisResource.is_active,
+      ]),
+    );
+    await db.query(insertCrisisResourcesQueryString);
+
+    const insertUsefulLinksQueryString = format(
+      `INSERT INTO useful_links (title, url, description, sort_order, is_active, metadata) VALUES %L RETURNING id`,
+      useful_links.map((link) => [
+        link.title,
+        link.url,
+        link.description ?? null,
+        link.sort_order ?? 0,
+        link.is_active ?? true,
+        link.metadata ? JSON.stringify(link.metadata) : null,
+      ]),
+    );
+    await db.query(insertUsefulLinksQueryString);
+
+    const insertNotesQueryString = format(
+      `INSERT INTO notes (title, content, author_id) VALUES %L RETURNING id`,
+      notes.map((note) => [note.title, note.content, note.author_id]),
+    );
+    await db.query(insertNotesQueryString);
+
+    const insertNoteCommentsQueryString = format(
+      `INSERT INTO note_comments (note_id, author_id, content) VALUES %L RETURNING id`,
+      note_comments.map((nc) => [nc.note_id, nc.author_id, nc.content]),
+    );
+    await db.query(insertNoteCommentsQueryString);
+  } catch (err) {
+    console.error("Error seeding database:", err);
+  }
+};
+
+export default seed;

@@ -1,0 +1,66 @@
+{
+  "name": "backend",
+  "author": "tibbs",
+  "version": "1.0.0",
+  "description": "Express app",
+  "main": "listener.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/your-repo-name.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/your-repo-name/issues"
+  },
+  "homepage": "https://github.com/yourusername/your-repo-name#readme",
+  "keywords": [],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/listener.js",
+    "start:prod:mem": "node --max-old-space-size=1024 dist/listener.js",
+    "dev": "nodemon listener.ts",
+    "test": "jest --runInBand",
+    "seed": "ts-node db/seeds/run-seed.ts",
+    "seed:test": "NODE_ENV=test npm run seed",
+    "seed:dev": "NODE_ENV=development npm run seed",
+    "seed-prod": "NODE_ENV=production npm run seed"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.14.1",
+    "pg-format": "^1.0.4",
+    "uploadthing": "^7.7.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.14.0",
+    "@types/pg": "^8.11.11",
+    "@types/pg-format": "^1.0.5",
+    "@types/supertest": "^6.0.3",
+    "jest-extended": "^4.0.2",
+    "jest-sorted": "^1.0.15",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.1.0",
+    "ts-jest": "^29.3.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "jest-extended/all",
+      "jest-sorted"
+    ]
+  }
+}

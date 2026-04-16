@@ -1,0 +1,578 @@
+{
+  "GET /api": {
+    "description": "Serves a JSON representation of all available API endpoints.",
+    "auth": "None",
+    "exampleResponse": { "endpoints": {} },
+    "errors": []
+  },
+  "auth": {
+    "POST /api/auth/login": {
+      "description": "Authenticate with email and password. Returns user and JWT token.",
+      "auth": "None",
+      "body": { "email": "string", "password": "string" },
+      "exampleResponse": {
+        "user": {
+          "id": 1,
+          "username": "alice123",
+          "email": "alice@example.com",
+          "role": "admin",
+          "created_at": "",
+          "updated_at": ""
+        },
+        "token": "jwt.string"
+      },
+      "errors": [
+        { "status": 400, "msg": "Email and password are required" },
+        { "status": 401, "msg": "Invalid email or password" },
+        { "status": 500, "msg": "Server configuration error (JWT_SECRET missing)" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "POST /api/auth/logout": {
+      "description": "Log out. Returns confirmation message.",
+      "auth": "None",
+      "exampleResponse": { "msg": "Logged out" },
+      "errors": []
+    }
+  },
+  "users": {
+    "GET /api/users/me": {
+      "description": "Returns the currently authenticated user. Requires Bearer token.",
+      "auth": "Bearer token (Authorization header)",
+      "exampleResponse": {
+        "user": {
+          "id": 1,
+          "username": "alice123",
+          "email": "alice@example.com",
+          "role": "admin",
+          "created_at": "",
+          "updated_at": ""
+        }
+      },
+      "errors": [
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 500, "msg": "Server configuration error (JWT_SECRET missing)" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    }
+  },
+  "staff": {
+    "GET /api/dashboard/staff": {
+      "description": "List staff members. Supports pagination and filters. Admin only.",
+      "auth": "Bearer token (admin)",
+      "query": {
+        "page": "number (optional)",
+        "limit": "number (optional)",
+        "role": "admin | editor | staff (optional)",
+        "is_active": "true | false (optional)",
+        "search": "string (optional)"
+      },
+      "exampleResponse": {
+        "staffMembers": [],
+        "total": 0,
+        "page": 1,
+        "limit": 10
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid page query parameter" },
+        { "status": 400, "msg": "Invalid limit query parameter" },
+        { "status": 400, "msg": "Invalid is_active query parameter" },
+        { "status": 400, "msg": "Invalid role query parameter" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied" },
+        { "status": 404, "msg": "No staff members found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "POST /api/dashboard/staff": {
+      "description": "Create a new staff member. Admin only.",
+      "auth": "Bearer token (admin)",
+      "body": {
+        "username": "string",
+        "email": "string",
+        "password": "string",
+        "role": "admin | editor | staff"
+      },
+      "exampleResponse": {
+        "staffMember": {
+          "id": 1,
+          "username": "alice123",
+          "email": "alice@example.com",
+          "role": "admin",
+          "is_active": true,
+          "created_at": "",
+          "updated_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Request body cannot be empty" },
+        { "status": 400, "msg": "Password is required" },
+        { "status": 400, "msg": "Username is required" },
+        { "status": 400, "msg": "Email is required" },
+        { "status": 400, "msg": "Role is required" },
+        { "status": 400, "msg": "Failed to create staff member" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "GET /api/dashboard/staff/:id": {
+      "description": "Get a single staff member by ID. Admin only.",
+      "auth": "Bearer token (admin)",
+      "exampleResponse": {
+        "staffMember": {
+          "id": 1,
+          "username": "alice123",
+          "email": "alice@example.com",
+          "role": "admin",
+          "is_active": true,
+          "created_at": "",
+          "updated_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid staff member ID" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied" },
+        { "status": 404, "msg": "Staff member not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "PUT /api/dashboard/staff/:id": {
+      "description": "Update a staff member by ID. Admin only.",
+      "auth": "Bearer token (admin)",
+      "body": {
+        "username": "string (optional)",
+        "email": "string (optional)",
+        "role": "admin | editor | staff (optional)"
+      },
+      "exampleResponse": {
+        "staffMember": {
+          "id": 1,
+          "username": "alice123",
+          "email": "alice@example.com",
+          "role": "admin",
+          "is_active": true,
+          "created_at": "",
+          "updated_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid staff member ID" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied" },
+        { "status": 404, "msg": "Staff member not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "DELETE /api/dashboard/staff/:id": {
+      "description": "Delete a staff member by ID. Returns 204 No Content with no body. Admin only.",
+      "auth": "Bearer token (admin)",
+      "exampleResponse": null,
+      "errors": [
+        { "status": 400, "msg": "Invalid staff member ID" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied" },
+        { "status": 404, "msg": "Staff member not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "PATCH /api/dashboard/staff/:id/role": {
+      "description": "Update a staff member's role. Admin only.",
+      "auth": "Bearer token (admin)",
+      "body": { "role": "admin | editor | staff" },
+      "exampleResponse": {
+        "staffMember": {
+          "id": 1,
+          "username": "alice123",
+          "email": "alice@example.com",
+          "role": "admin",
+          "is_active": true,
+          "created_at": "",
+          "updated_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid staff member ID" },
+        { "status": 400, "msg": "Role is required" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied" },
+        { "status": 404, "msg": "Staff member not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "PATCH /api/dashboard/staff/:id/deactivate": {
+      "description": "Deactivate a staff member. Admin only.",
+      "auth": "Bearer token (admin)",
+      "exampleResponse": {
+        "staffMember": {
+          "id": 1,
+          "username": "alice123",
+          "email": "alice@example.com",
+          "role": "admin",
+          "is_active": true,
+          "created_at": "",
+          "updated_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid staff member ID" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied" },
+        { "status": 404, "msg": "Staff member not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "PATCH /api/dashboard/staff/:id/activate": {
+      "description": "Activate a staff member. Admin only.",
+      "auth": "Bearer token (admin)",
+      "exampleResponse": {
+        "staffMember": {
+          "id": 1,
+          "username": "alice123",
+          "email": "alice@example.com",
+          "role": "admin",
+          "is_active": true,
+          "created_at": "",
+          "updated_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid staff member ID" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied" },
+        { "status": 404, "msg": "Staff member not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    }
+  },
+  "events": {
+    "GET /api/dashboard/events": {
+      "description": "List all events. Admin and editor only.",
+      "auth": "Bearer token (admin or editor)",
+      "exampleResponse": {
+        "events": [
+          {
+            "id": 1,
+            "title": "Event title",
+            "description": "Event description",
+            "starts_at": "2025-01-01T00:00:00.000Z",
+            "ends_at": "2025-01-02T00:00:00.000Z",
+            "location": "London",
+            "type": "volunteering",
+            "max_volunteers": 10,
+            "created_at": "",
+            "updated_at": "",
+            "created_by": 1
+          }
+        ]
+      },
+      "errors": [
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "POST /api/dashboard/events": {
+      "description": "Create a new event. Admin and editor only.",
+      "auth": "Bearer token (admin or editor)",
+      "body": {
+        "title": "string",
+        "description": "string",
+        "starts_at": "string (ISO date)",
+        "ends_at": "string (ISO date)",
+        "location": "string",
+        "type": "string",
+        "max_volunteers": "number"
+      },
+      "exampleResponse": {
+        "event": {
+          "id": 1,
+          "title": "Event title",
+          "description": "Event description",
+          "starts_at": "2025-01-01T00:00:00.000Z",
+          "ends_at": "2025-01-02T00:00:00.000Z",
+          "location": "London",
+          "type": "volunteering",
+          "max_volunteers": 10,
+          "created_at": "",
+          "updated_at": "",
+          "created_by": 1
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Request body cannot be empty" },
+        { "status": 400, "msg": "Title is required" },
+        { "status": 400, "msg": "Description is required" },
+        { "status": 400, "msg": "Starts at is required" },
+        { "status": 400, "msg": "Ends at is required" },
+        { "status": 400, "msg": "Location is required" },
+        { "status": 400, "msg": "Type is required" },
+        { "status": 400, "msg": "Max volunteers is required" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "GET /api/dashboard/events/:id": {
+      "description": "Get a single event by ID. Admin and editor only.",
+      "auth": "Bearer token (admin or editor)",
+      "exampleResponse": {
+        "event": {
+          "id": 1,
+          "title": "Event title",
+          "description": "Event description",
+          "starts_at": "2025-01-01T00:00:00.000Z",
+          "ends_at": "2025-01-02T00:00:00.000Z",
+          "location": "London",
+          "type": "volunteering",
+          "max_volunteers": 10,
+          "created_at": "",
+          "updated_at": "",
+          "created_by": 1
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid event ID" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 404, "msg": "Event not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "PUT /api/dashboard/events/:id": {
+      "description": "Update an event by ID. Full replacement — all body fields required. Admin and editor only.",
+      "auth": "Bearer token (admin or editor)",
+      "body": {
+        "title": "string",
+        "description": "string",
+        "starts_at": "string (ISO date)",
+        "ends_at": "string (ISO date)",
+        "location": "string",
+        "type": "string",
+        "max_volunteers": "number"
+      },
+      "exampleResponse": {
+        "event": {
+          "id": 1,
+          "title": "Event title",
+          "description": "Event description",
+          "starts_at": "2025-01-01T00:00:00.000Z",
+          "ends_at": "2025-01-02T00:00:00.000Z",
+          "location": "London",
+          "type": "volunteering",
+          "max_volunteers": 10,
+          "created_at": "",
+          "updated_at": "",
+          "created_by": 1
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid event ID" },
+        { "status": 400, "msg": "Request body cannot be empty" },
+        { "status": 400, "msg": "Title is required" },
+        { "status": 400, "msg": "Description is required" },
+        { "status": 400, "msg": "Starts at is required" },
+        { "status": 400, "msg": "Ends at is required" },
+        { "status": 400, "msg": "Location is required" },
+        { "status": 400, "msg": "Type is required" },
+        { "status": 400, "msg": "Max volunteers is required" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 404, "msg": "Event not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "DELETE /api/dashboard/events/:id": {
+      "description": "Delete an event by ID. Returns the deleted event. Admin and editor only.",
+      "auth": "Bearer token (admin or editor)",
+      "exampleResponse": {
+        "event": {
+          "id": 1,
+          "title": "Event title",
+          "description": "Event description",
+          "starts_at": "2025-01-01T00:00:00.000Z",
+          "ends_at": "2025-01-02T00:00:00.000Z",
+          "location": "London",
+          "type": "volunteering",
+          "max_volunteers": 10,
+          "created_at": "",
+          "updated_at": "",
+          "created_by": 1
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid event ID" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 404, "msg": "Event not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    }
+  },
+  "resources": {
+    "GET /api/dashboard/resources": {
+      "description": "List all resources. Admin and editor only.",
+      "auth": "Bearer token (admin or editor)",
+      "exampleResponse": {
+        "resources": [
+          {
+            "id": 1,
+            "url": "https://example.com/file.pdf",
+            "mime_type": "application/pdf",
+            "resource_type": "document",
+            "file_name": "file.pdf",
+            "file_key": null,
+            "uploaded_by": 1,
+            "attachable_type": null,
+            "attachable_id": null,
+            "metadata": null,
+            "created_at": ""
+          }
+        ]
+      },
+      "errors": [
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "POST /api/dashboard/resources": {
+      "description": "Create a new resource. Admin and editor only. Also used by upload callback (POST /api/upload-callback/resources) with x-upload-callback-secret header.",
+      "auth": "Bearer token (admin or editor) or x-upload-callback-secret header",
+      "body": {
+        "url": "string",
+        "mime_type": "string",
+        "file_name": "string",
+        "file_key": "string (optional)",
+        "uploaded_by": "number (optional)",
+        "attachable_type": "string (optional)",
+        "attachable_id": "number (optional)",
+        "metadata": "object (optional)"
+      },
+      "exampleResponse": {
+        "resource": {
+          "id": 1,
+          "url": "https://example.com/file.pdf",
+          "mime_type": "application/pdf",
+          "resource_type": "document",
+          "file_name": "file.pdf",
+          "file_key": null,
+          "uploaded_by": 1,
+          "attachable_type": null,
+          "attachable_id": null,
+          "metadata": null,
+          "created_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "url is required" },
+        { "status": 400, "msg": "mime_type is required" },
+        { "status": 400, "msg": "file_name is required" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "PATCH /api/dashboard/resources/:id": {
+      "description": "Update a resource by ID. Admin and editor only. All body fields required when updating.",
+      "auth": "Bearer token (admin or editor)",
+      "body": {
+        "url": "string",
+        "mime_type": "string",
+        "file_name": "string",
+        "file_key": "string (optional)",
+        "uploaded_by": "number (optional)",
+        "attachable_type": "string (optional)",
+        "attachable_id": "number (optional)",
+        "metadata": "object (optional)"
+      },
+      "exampleResponse": {
+        "resource": {
+          "id": 1,
+          "url": "https://example.com/file.pdf",
+          "mime_type": "application/pdf",
+          "resource_type": "document",
+          "file_name": "file.pdf",
+          "file_key": null,
+          "uploaded_by": 1,
+          "attachable_type": null,
+          "attachable_id": null,
+          "metadata": null,
+          "created_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid resource id" },
+        { "status": 400, "msg": "url is required" },
+        { "status": 400, "msg": "mime_type is required" },
+        { "status": 400, "msg": "file_name is required" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    },
+    "DELETE /api/dashboard/resources/:id": {
+      "description": "Delete a resource by ID. Admin and editor only.",
+      "auth": "Bearer token (admin or editor)",
+      "exampleResponse": {
+        "resource": {
+          "id": 1,
+          "url": "https://example.com/file.pdf",
+          "mime_type": "application/pdf",
+          "resource_type": "document",
+          "file_name": "file.pdf",
+          "file_key": null,
+          "uploaded_by": 1,
+          "attachable_type": null,
+          "attachable_id": null,
+          "metadata": null,
+          "created_at": ""
+        }
+      },
+      "errors": [
+        { "status": 400, "msg": "Invalid resource id" },
+        { "status": 401, "msg": "Authentication required" },
+        { "status": 401, "msg": "Invalid or expired token" },
+        { "status": 401, "msg": "User not found" },
+        { "status": 403, "msg": "Access denied. You must be an admin or editor to access this resource." },
+        { "status": 404, "msg": "Resource not found" },
+        { "status": 500, "msg": "Internal server error" }
+      ]
+    }
+  }
+}

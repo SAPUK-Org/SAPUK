@@ -1,0 +1,30 @@
+import { Event } from "../../../types";
+
+export const events: Event[] = [
+  {
+    id: 1,
+    title: "A Day in the Life - Events Lead",
+    description: "Description 1",
+    starts_at: new Date(),
+    ends_at: new Date(),
+    location: "Location 1",
+    type: "Type 1",
+    max_volunteers: 10,
+    created_by: 1,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    id: 2,
+    title: "Event 2",
+    description: "Description 2",
+    starts_at: new Date(),
+    ends_at: new Date(),
+    location: "Location 2",
+    type: "Type 2",
+    max_volunteers: 20,
+    created_by: 2,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+];

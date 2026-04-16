@@ -1,0 +1,79 @@
+import { Event } from "../../../types";
+
+export const events: Event[] = [
+  {
+    id: 1,
+    title: "I Don't Know Anyone Either",
+    dates_description: "Last Saturday / Sunday of every month",
+    description:
+      "A gentle, welcoming space for people who feel isolated. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
+    cover_image:
+      "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwq4G2Nv5N5weoZT7nX0E83VGLBvSPJhs94i6C",
+    location: "Multiple Locations",
+    type: "Community Event",
+    created_by: 1,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    id: 2,
+    title: "Safe Spaces",
+    starts_at: new Date("2025-03-29T10:00:00Z"),
+    ends_at: new Date("2025-03-29T16:00:00Z"),
+    max_volunteers: 15,
+    description:
+      "A safe space for people who are struggling with suicidal thoughts or feelings. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
+    location: "Multiple Locations",
+    type: "Community Event",
+    created_by: 2,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    id: 3,
+    title: "The Semicolon Fest",
+    starts_at: new Date("2025-04-12T09:00:00Z"),
+    ends_at: new Date("2025-04-12T18:00:00Z"),
+    max_volunteers: 25,
+    description:
+      "A festival for people who are struggling with suicidal thoughts or feelings. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
+    cover_image:
+      "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwSgkNq3nszR8M3u9m7kNZCaorFDgqybHf6VvY",
+    location: "Multiple Locations",
+    type: "Community Event",
+    created_by: 1,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    id: 4,
+    title: "The Semicolon Project",
+    starts_at: new Date("2025-05-03T14:00:00Z"),
+    ends_at: new Date("2025-05-03T17:00:00Z"),
+    max_volunteers: 10,
+    description:
+      "A project for people who are struggling with suicidal thoughts or feelings. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
+    cover_image: null,
+    location: "Multiple Locations",
+    type: "Community Event",
+    created_by: 1,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    id: 5,
+    title: "The Suicidology Seminar",
+    starts_at: new Date("2025-06-14T09:30:00Z"),
+    ends_at: new Date("2025-06-14T16:30:00Z"),
+    max_volunteers: 50,
+    description:
+      "A seminar for people who are struggling with suicidal thoughts or feelings. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
+    cover_image:
+      "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwgQYJlA0dbDFNzJK5pSw7XZsCkn2Bah8OlqQx",
+    location: "Longridge, Preston",
+    type: "Seminar",
+    created_by: 1,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+];

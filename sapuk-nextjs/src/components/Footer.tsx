@@ -4,13 +4,6 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="w-full flex flex-col bg-footer text-secondary-foreground relative">
-      <div
-        className="absolute inset-0 bg-contain bg-center"
-        style={{
-          backgroundImage:
-            'url("https://dju754gknh.ufs.sh/f/Uv1WD6etinpwjxdmaFU2sga69fPjWHmSeMVYkrxd0nlhZt3p")',
-        }}
-      />
       <div className="relative grid grid-cols-1 md:grid-cols-3 items-start md:justify-items-center gap-8 py-20 px-4 md:px-10 border-b">
         <div className="flex flex-col space-y-3">
           <h3 className="text-lg font-semibold">Resources</h3>

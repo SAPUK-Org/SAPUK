@@ -7,7 +7,6 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { dropdownItems } from "@/lib/navigation";
 import { useScroll, useDropdown, useActivePath } from "@/hooks";
 
-// Social Media Links Component
 const SocialMediaLinks = () => (
   <div className="flex flex-row justify-center items-center gap-2 sm:gap-4">
     <SocialIcon
@@ -43,7 +42,6 @@ const SocialMediaLinks = () => (
   </div>
 );
 
-// Donate Button Component
 const DonateButton = () => (
   <Link
     href="/donate"
@@ -53,7 +51,6 @@ const DonateButton = () => (
   </Link>
 );
 
-// Top Bar Component
 const TopBar = ({ isScrolled }: { isScrolled: boolean }) => (
   <div
     className={`w-full h-[32px] sm:h-[36px] py-2 px-4 sm:px-8 lg:px-16 xl:px-72 bg-background flex flex-row justify-between items-center 
@@ -66,7 +63,6 @@ const TopBar = ({ isScrolled }: { isScrolled: boolean }) => (
   </div>
 );
 
-// Dropdown Menu Item Component
 const DropdownMenuItem = ({
   item,
   onClose,
@@ -84,7 +80,6 @@ const DropdownMenuItem = ({
   </Link>
 );
 
-// Desktop Dropdown Component
 const DesktopDropdown = ({
   id,
   label,
@@ -147,7 +142,6 @@ const DesktopDropdown = ({
   </div>
 );
 
-// Desktop Navigation Component
 const DesktopNavigation = ({
   dropdownItems,
   isActive,
@@ -196,7 +190,6 @@ const DesktopNavigation = ({
   </div>
 );
 
-// Mobile Menu Toggle Button Component
 const MobileMenuToggle = ({
   isOpen,
   onToggle,
@@ -229,7 +222,6 @@ const MobileMenuToggle = ({
   </button>
 );
 
-// Mobile Dropdown Component
 const MobileDropdown = ({
   id,
   label,
@@ -296,7 +288,6 @@ const MobileDropdown = ({
   </div>
 );
 
-// Mobile Navigation Component
 const MobileNavigation = ({
   isOpen,
   dropdownItems,
@@ -349,7 +340,6 @@ const MobileNavigation = ({
   );
 };
 
-// Page Title Component
 const PageTitle = ({ title }: { title: string | null }) => {
   if (!title) return null;
 
@@ -360,7 +350,6 @@ const PageTitle = ({ title }: { title: string | null }) => {
   );
 };
 
-// Main Header Component
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const isScrolled = useScroll();

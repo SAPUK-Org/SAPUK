@@ -1,5 +1,5 @@
-import ContactForm from "@/components/sapservices/contact-us/ContactForm";
-import ContactInfo from "@/components/sapservices/contact-us/ContactInfo";
+import ContactForm from "@/components/how-we-can-help-you/contact-us/ContactForm";
+import ContactInfo from "@/components/how-we-can-help-you/contact-us/ContactInfo";
 
 export default function ContactUsPage() {
   return (

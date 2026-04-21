@@ -5,7 +5,6 @@ export const dropdownItems: DropdownItem[] = [
     id: "hub",
     label: "SAPUK HUB",
     menuItems: [
-      { href: "/sapukhub/projects", text: "Projects" },
       { href: "/sapukhub/students", text: "Students" },
       {
         href: "/sapukhub/supporting-suicidal-thoughts",
@@ -16,12 +15,16 @@ export const dropdownItems: DropdownItem[] = [
     ],
   },
   {
-    id: "services",
+    id: "help-you",
     label: "HOW WE CAN HELP YOU",
     menuItems: [
-      { href: "/sapservices/community", text: "Blogs/Community" },
-      { href: "/sapservices/downloadable-media", text: "Downloadable Media" },
-      { href: "/sapservices/contact-us", text: "Contact Us" },
+      { href: "/how-we-can-help-you/projects", text: "Projects" },
+      { href: "/how-we-can-help-you/community", text: "Blogs/Community" },
+      {
+        href: "/how-we-can-help-you/downloadable-media",
+        text: "Downloadable Media",
+      },
+      { href: "/how-we-can-help-you/contact-us", text: "Contact Us" },
     ],
   },
   {

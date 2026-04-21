@@ -46,7 +46,7 @@ const SocialMediaLinks = () => (
 // Donate Button Component
 const DonateButton = () => (
   <Link
-    href="/why-donate"
+    href="/donate"
     className="text-sm md:text-base font-bold text-yellow-200 hover:text-yellow-300"
   >
     Donate

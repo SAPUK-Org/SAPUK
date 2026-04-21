@@ -17,7 +17,7 @@ export const dropdownItems: DropdownItem[] = [
   },
   {
     id: "services",
-    label: "SAP SERVICES",
+    label: "HOW WE CAN HELP YOU",
     menuItems: [
       { href: "/sapservices/community", text: "Blogs/Community" },
       { href: "/sapservices/downloadable-media", text: "Downloadable Media" },
@@ -25,12 +25,12 @@ export const dropdownItems: DropdownItem[] = [
     ],
   },
   {
-    id: "donate",
-    label: "COULD YOU HELP US?",
+    id: "help-us",
+    label: "HOW YOU CAN HELP US",
     menuItems: [
       { href: "/volunteer", text: "Volunteer" },
-      { href: "/why-donate", text: "Why Donate?" },
-      { href: "/fundraise", text: "Fundraising" },
+      { href: "/donate", text: "Donate" },
+      { href: "/fundraise", text: "Fundraise" },
     ],
   },
   {

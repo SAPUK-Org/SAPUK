@@ -6,7 +6,7 @@ import {
   MainContent,
   ScrollingText,
   ServicesSection,
-} from "@/components/why-donate";
+} from "@/components/donate";
 
 export default function WhyDonatePage() {
   return (

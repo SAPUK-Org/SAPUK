@@ -56,6 +56,9 @@ const seed = async ({ users }: SeedData) => {
         location TEXT NOT NULL,
         type TEXT NOT NULL,
         max_volunteers INTEGER DEFAULT NULL,
+        is_active BOOLEAN DEFAULT TRUE NOT NULL,
+        external_links JSONB NOT NULL DEFAULT '[]'::jsonb,
+        studio_partners JSONB NOT NULL DEFAULT '[]'::jsonb,
         created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -160,7 +163,7 @@ const seed = async ({ users }: SeedData) => {
     await db.query(insertUsersQueryString);
 
     const insertEventsQueryString = format(
-      `INSERT INTO events (title, description, cover_image, dates_description, starts_at, ends_at, location, type, max_volunteers, created_by) VALUES %L RETURNING id`,
+      `INSERT INTO events (title, description, cover_image, dates_description, starts_at, ends_at, location, type, max_volunteers, is_active, external_links, studio_partners, created_by) VALUES %L RETURNING id`,
       events.map((event) => [
         event.title,
         event.description,
@@ -171,6 +174,9 @@ const seed = async ({ users }: SeedData) => {
         event.location,
         event.type,
         event.max_volunteers ?? null,
+        event.is_active ?? true,
+        JSON.stringify(event.external_links ?? []),
+        JSON.stringify(event.studio_partners ?? []),
         event.created_by,
       ]),
     );

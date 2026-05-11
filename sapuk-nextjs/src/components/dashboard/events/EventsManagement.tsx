@@ -16,8 +16,45 @@ import { EventFormDialog } from "./EventFormDialog";
 import { DeleteEventDialog } from "./DeleteEventDialog";
 
 function toEventApiBody(values: EventFormValues) {
+  const external_links = values.external_links
+    .filter((l) => l.label.trim() && l.url.trim())
+    .map((l) => ({
+      label: l.label.trim(),
+      url: l.url.trim(),
+      kind: l.kind,
+    }));
+
+  const studio_partners = values.studio_partners
+    .filter((p) => {
+      const name = p.name.trim();
+      const loc = (p.location ?? "").trim();
+      const img = (p.imageSrc ?? "").trim();
+      const desc = (p.description ?? "").trim();
+      const hasSocial = (p.socialLinks ?? []).some(
+        (s) => s.network.trim() && s.url.trim(),
+      );
+      return name || loc || img || desc || hasSocial;
+    })
+    .map((p) => ({
+      name: p.name.trim(),
+      location: (p.location ?? "").trim() || null,
+      imageSrc: (p.imageSrc ?? "").trim() || null,
+      description: (p.description ?? "").trim() || null,
+      socialLinks: (p.socialLinks ?? [])
+        .filter((s) => s.network.trim() && s.url.trim())
+        .map((s) => ({
+          network: s.network.trim(),
+          url: s.url.trim(),
+        })),
+    }));
+
+  const datesDesc = (values.dates_description ?? "").trim() || null;
+
   return {
     ...values,
+    external_links,
+    studio_partners,
+    dates_description: datesDesc,
     starts_at: values.starts_at
       ? new Date(values.starts_at).toISOString()
       : null,
@@ -41,6 +78,7 @@ export function EventsManagement() {
   const [editGallery, setEditGallery] = useState<EventGalleryResource[]>([]);
   const [editGalleryLoading, setEditGalleryLoading] = useState(false);
   const [galleryRemovingId, setGalleryRemovingId] = useState<number | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
   const { startUpload, isUploading } = useUploadThing("resourceUploader", {
     onUploadError: (e) => {
@@ -274,11 +312,34 @@ export function EventsManagement() {
       title: event.title,
       description: event.description,
       cover_image: event.cover_image ?? "",
+      dates_description: event.dates_description ?? "",
       starts_at: event.starts_at ? toDatetimeLocal(event.starts_at) : "",
       ends_at: event.ends_at ? toDatetimeLocal(event.ends_at) : "",
       location: event.location,
       type: event.type,
       max_volunteers: event.max_volunteers ?? 1,
+      is_active: event.is_active !== false,
+      external_links: Array.isArray(event.external_links)
+        ? event.external_links.map((l) => ({
+            label: l.label,
+            url: l.url,
+            kind: l.kind,
+          }))
+        : [],
+      studio_partners: Array.isArray(event.studio_partners)
+        ? event.studio_partners.map((p) => ({
+            name: p.name ?? "",
+            location: p.location ?? "",
+            imageSrc: p.imageSrc ?? "",
+            description: p.description ?? "",
+            socialLinks: Array.isArray(p.socialLinks)
+              ? p.socialLinks.map((s) => ({
+                  network: s.network,
+                  url: s.url,
+                }))
+              : [],
+          }))
+        : [],
     });
     setEditOpen(true);
   };
@@ -287,6 +348,30 @@ export function EventsManagement() {
     setTargetEvent(event);
     setActionError(null);
     setDeleteOpen(true);
+  };
+
+  const onToggleActive = async (event: Event) => {
+    if (!token) return;
+    const currentlyActive = event.is_active !== false;
+    setTogglingId(event.id);
+    setActionError(null);
+    const { data, ok } = await api<{ msg?: string }>(
+      `/api/db/events/${event.id}/active`,
+      "PATCH",
+      {
+        token,
+        body: { is_active: !currentlyActive },
+      },
+    );
+    setTogglingId(null);
+    if (!ok) {
+      setActionError(
+        (data as { msg?: string })?.msg ?? "Failed to update visibility",
+      );
+      return;
+    }
+    setActionError(null);
+    await fetchEvents();
   };
 
   const handleCancelForm = () => {
@@ -309,6 +394,11 @@ export function EventsManagement() {
 
   return (
     <div className="flex flex-col bg-background p-6">
+      {actionError && !createOpen && !editOpen && !deleteOpen ? (
+        <p className="mb-4 text-sm text-destructive" role="alert">
+          {actionError}
+        </p>
+      ) : null}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>All events</CardTitle>
@@ -339,6 +429,8 @@ export function EventsManagement() {
                 <EventCard
                   key={event.id}
                   event={event}
+                  onToggleActive={onToggleActive}
+                  isToggleLoading={togglingId === event.id}
                   onEdit={openEdit}
                   onDelete={openDelete}
                 />
@@ -358,7 +450,7 @@ export function EventsManagement() {
           }
         }}
         title="Create event"
-        description="Add a new event. All fields are required."
+        description="Add a new event. Required fields must be filled. Uncheck “Visible on public projects page” to hide it from the marketing site."
         form={createForm}
         onSubmit={onCreateSubmit}
         actionError={actionError}
@@ -380,7 +472,7 @@ export function EventsManagement() {
           }
         }}
         title="Edit event"
-        description="Update the event details."
+        description="Update the event. Toggle visibility to show or hide it on the public projects page."
         form={editForm}
         onSubmit={onEditSubmit}
         actionError={actionError}

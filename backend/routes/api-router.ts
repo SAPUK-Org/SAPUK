@@ -9,10 +9,13 @@ import { createRouteHandler } from "uploadthing/express";
 import { requireAuth } from "../middleware/auth";
 import { createResource } from "../controllers/resources-controller";
 import { requireValidUploadSecret } from "../middleware/auth";
+import publicEventsRouter from "./public/public-events-router";
 
 apiRouter.get("/", (req, res) => {
   res.status(200).send({ endpoints: endpoints });
 });
+
+apiRouter.use("/public/events", publicEventsRouter);
 
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);

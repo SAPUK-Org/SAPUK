@@ -10,6 +10,27 @@ export type User = {
   updated_at: Date;
 };
 
+export type EventExternalLinkKind = "web" | "tiktok" | "image";
+
+export type EventExternalLink = {
+  label: string;
+  url: string;
+  kind: EventExternalLinkKind;
+};
+
+export type EventStudioSocialLink = {
+  network: string;
+  url: string;
+};
+
+export type EventStudioPartner = {
+  name: string;
+  location?: string | null;
+  imageSrc?: string | null;
+  description?: string | null;
+  socialLinks?: EventStudioSocialLink[];
+};
+
 export type Event = {
   id: number;
   title: string;
@@ -21,6 +42,10 @@ export type Event = {
   location: string;
   type: string;
   max_volunteers?: number;
+  /** When false, event is hidden from public projects page. */
+  is_active: boolean;
+  external_links?: EventExternalLink[] | null;
+  studio_partners?: EventStudioPartner[] | null;
   created_at: Date;
   updated_at: Date;
   created_by: number;

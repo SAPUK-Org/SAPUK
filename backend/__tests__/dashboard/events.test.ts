@@ -25,17 +25,22 @@ describe("Events API Endpoints", () => {
         .get("/api/dashboard/events")
         .set("Authorization", `Bearer ${token}`)
         .expect(200);
-      events.forEach((event: Event) => {
+      events.forEach((event: Event & { gallery?: unknown }) => {
         expect(event.title).toBeDefined();
         expect(event.description).toBeDefined();
-        expect(event.starts_at).toBeDefined();
-        expect(event.ends_at).toBeDefined();
+        expect(event.starts_at === null || typeof event.starts_at === "string").toBe(
+          true,
+        );
+        expect(event.ends_at === null || typeof event.ends_at === "string").toBe(
+          true,
+        );
         expect(event.location).toBeDefined();
         expect(event.type).toBeDefined();
         expect(event.max_volunteers).toBeDefined();
         expect(event.created_by).toBeDefined();
         expect(event.created_at).toBeDefined();
         expect(event.updated_at).toBeDefined();
+        expect(Array.isArray(event.gallery)).toBe(true);
       });
     });
   });
@@ -127,29 +132,7 @@ describe("Events API Endpoints", () => {
         .expect(400);
       expect(msg).toBe("Description is required");
     });
-    test("Should return 400 when starts_at is missing", async () => {
-      const loginRes = await request(app)
-        .post("/api/auth/login")
-        .send({ email: "alice@example.com", password: "password" })
-        .expect(200);
-      const { token } = loginRes.body;
-      const {
-        body: { msg },
-      } = await request(app)
-        .post("/api/dashboard/events")
-        .set("Authorization", `Bearer ${token}`)
-        .send({
-          title: "Test Event",
-          description: "Test Description",
-          ends_at: new Date(),
-          location: "Test Location",
-          type: "Test Type",
-          max_volunteers: 10,
-        })
-        .expect(400);
-      expect(msg).toBe("Starts at is required");
-    });
-    test("Should return 400 when ends_at is missing", async () => {
+    test("Should return 400 when only starts_at is set without ends_at", async () => {
       const loginRes = await request(app)
         .post("/api/auth/login")
         .send({ email: "alice@example.com", password: "password" })
@@ -164,18 +147,72 @@ describe("Events API Endpoints", () => {
           title: "Test Event",
           description: "Test Description",
           starts_at: new Date(),
+          ends_at: null,
           location: "Test Location",
           type: "Test Type",
           max_volunteers: 10,
         })
         .expect(400);
-      expect(msg).toBe("Ends at is required");
+      expect(msg).toBe(
+        "Provide both starts_at and ends_at, or omit both / use null for neither",
+      );
+    });
+    test("Should return 400 when only ends_at is set without starts_at", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Test Event",
+          description: "Test Description",
+          starts_at: null,
+          ends_at: new Date(),
+          location: "Test Location",
+          type: "Test Type",
+          max_volunteers: 10,
+        })
+        .expect(400);
+      expect(msg).toBe(
+        "Provide both starts_at and ends_at, or omit both / use null for neither",
+      );
+    });
+    test("Should return 201 when starts_at and ends_at are both omitted (prose-only schedule)", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const { body } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Undated project",
+          description: "Details TBC",
+          dates_description: "June 2026 and July 2026 — exact days TBC",
+          location: "TBC",
+          type: "Project",
+          max_volunteers: 5,
+        })
+        .expect(201);
+      expect(body.event.starts_at).toBeNull();
+      expect(body.event.ends_at).toBeNull();
+      expect(body.event.dates_description).toBe(
+        "June 2026 and July 2026 — exact days TBC",
+      );
     });
     test("Should return 401 when no token is provided", async () => {
       const {
         body: { msg },
       } = await request(app).post("/api/dashboard/events").expect(401);
-      expect(msg).toBe("Authentication required");
+      expect(msg).toBe(
+        "Missing Authorization header. Please sign in and try again.",
+      );
     });
     test("Should return 401 when token is invalid", async () => {
       const {
@@ -193,7 +230,7 @@ describe("Events API Endpoints", () => {
           max_volunteers: 10,
         })
         .expect(401);
-      expect(msg).toBe("Invalid or expired token");
+      expect(msg).toBe("Invalid access token. Please sign in again.");
     });
     test("Should return 403 when user is not an admin or editor", async () => {
       const loginRes = await request(app)
@@ -236,8 +273,12 @@ describe("Events API Endpoints", () => {
         .expect(200);
       expect(event.title).toBeDefined();
       expect(event.description).toBeDefined();
-      expect(event.starts_at).toBeDefined();
-      expect(event.ends_at).toBeDefined();
+      expect(event.starts_at === null || typeof event.starts_at === "string").toBe(
+        true,
+      );
+      expect(event.ends_at === null || typeof event.ends_at === "string").toBe(
+        true,
+      );
       expect(event.location).toBeDefined();
       expect(event.type).toBeDefined();
       expect(event.max_volunteers).toBeDefined();
@@ -264,7 +305,9 @@ describe("Events API Endpoints", () => {
       const {
         body: { msg },
       } = await request(app).get("/api/dashboard/events/1").expect(401);
-      expect(msg).toBe("Authentication required");
+      expect(msg).toBe(
+        "Missing Authorization header. Please sign in and try again.",
+      );
     });
     test("Should return 401 when token is invalid", async () => {
       const {
@@ -273,7 +316,7 @@ describe("Events API Endpoints", () => {
         .get("/api/dashboard/events/1")
         .set("Authorization", "Bearer invalid-token")
         .expect(401);
-      expect(msg).toBe("Invalid or expired token");
+      expect(msg).toBe("Invalid access token. Please sign in again.");
     });
     test("Should return 403 when user is not an admin or editor", async () => {
       const loginRes = await request(app)
@@ -304,6 +347,87 @@ describe("Events API Endpoints", () => {
         .set("Authorization", `Bearer ${token}`)
         .expect(404);
       expect(msg).toBe("Event not found");
+    });
+  });
+  describe("PATCH /api/dashboard/events/:id/active", () => {
+    test("Should return 401 when no token is provided", async () => {
+      const {
+        body: { msg },
+      } = await request(app)
+        .patch("/api/dashboard/events/1/active")
+        .send({ is_active: false })
+        .expect(401);
+      expect(msg).toBe(
+        "Missing Authorization header. Please sign in and try again.",
+      );
+    });
+    test("Should return 400 when event ID is not a number", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .patch("/api/dashboard/events/notanumber/active")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ is_active: false })
+        .expect(400);
+      expect(msg).toBe("Invalid event ID");
+    });
+    test("Should return 400 when is_active is not a boolean", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .patch("/api/dashboard/events/1/active")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ is_active: "yes" })
+        .expect(400);
+      expect(msg).toBe("is_active must be a boolean");
+    });
+    test("Should return 404 when event is not found", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .patch("/api/dashboard/events/999/active")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ is_active: false })
+        .expect(404);
+      expect(msg).toBe("Event not found");
+    });
+    test("Should return 200 and update is_active when a valid token is provided", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { event: hidden },
+      } = await request(app)
+        .patch("/api/dashboard/events/1/active")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ is_active: false })
+        .expect(200);
+      expect(hidden.is_active).toBe(false);
+      const {
+        body: { event: shown },
+      } = await request(app)
+        .patch("/api/dashboard/events/1/active")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ is_active: true })
+        .expect(200);
+      expect(shown.is_active).toBe(true);
     });
   });
   describe("PUT /api/dashboard/events/:id", () => {
@@ -421,7 +545,7 @@ describe("Events API Endpoints", () => {
         .expect(400);
       expect(msg).toBe("Description is required");
     });
-    test("Should return 400 when starts_at is missing", async () => {
+    test("Should return 400 when only starts_at is set without ends_at on update", async () => {
       const loginRes = await request(app)
         .post("/api/auth/login")
         .send({ email: "alice@example.com", password: "password" })
@@ -430,46 +554,56 @@ describe("Events API Endpoints", () => {
       const {
         body: { msg },
       } = await request(app)
-        .put("/api/dashboard/events/1")
-        .set("Authorization", `Bearer ${token}`)
-        .send({
-          title: "Updated Event Title",
-          description: "Updated Description",
-          ends_at: new Date(),
-          location: "Test Location",
-          type: "Test Type",
-          max_volunteers: 10,
-        })
-        .expect(400);
-      expect(msg).toBe("Starts at is required");
-    });
-    test("Should return 400 when ends_at is missing", async () => {
-      const loginRes = await request(app)
-        .post("/api/auth/login")
-        .send({ email: "alice@example.com", password: "password" })
-        .expect(200);
-      const { token } = loginRes.body;
-      const {
-        body: { msg },
-      } = await request(app)
-        .put("/api/dashboard/events/1")
+        .put("/api/dashboard/events/2")
         .set("Authorization", `Bearer ${token}`)
         .send({
           title: "Updated Event Title",
           description: "Updated Description",
           starts_at: new Date(),
+          ends_at: null,
           location: "Test Location",
           type: "Test Type",
           max_volunteers: 10,
+          is_active: true,
         })
         .expect(400);
-      expect(msg).toBe("Ends at is required");
+      expect(msg).toBe(
+        "Provide both starts_at and ends_at, or omit both / use null for neither",
+      );
+    });
+    test("Should return 400 when only ends_at is set without starts_at on update", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .put("/api/dashboard/events/2")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Updated Event Title",
+          description: "Updated Description",
+          starts_at: null,
+          ends_at: new Date(),
+          location: "Test Location",
+          type: "Test Type",
+          max_volunteers: 10,
+          is_active: true,
+        })
+        .expect(400);
+      expect(msg).toBe(
+        "Provide both starts_at and ends_at, or omit both / use null for neither",
+      );
     });
     test("Should return 401 when no token is provided", async () => {
       const {
         body: { msg },
       } = await request(app).put("/api/dashboard/events/1").expect(401);
-      expect(msg).toBe("Authentication required");
+      expect(msg).toBe(
+        "Missing Authorization header. Please sign in and try again.",
+      );
     });
     test("Should return 401 when token is invalid", async () => {
       const {
@@ -487,7 +621,7 @@ describe("Events API Endpoints", () => {
           max_volunteers: 10,
         })
         .expect(401);
-      expect(msg).toBe("Invalid or expired token");
+      expect(msg).toBe("Invalid access token. Please sign in again.");
     });
     test("Should return 403 when user is not an admin or editor", async () => {
       const loginRes = await request(app)
@@ -568,7 +702,9 @@ describe("Events API Endpoints", () => {
       const {
         body: { msg },
       } = await request(app).delete("/api/dashboard/events/1").expect(401);
-      expect(msg).toBe("Authentication required");
+      expect(msg).toBe(
+        "Missing Authorization header. Please sign in and try again.",
+      );
     });
     test("Should return 401 when token is invalid", async () => {
       const {
@@ -577,7 +713,7 @@ describe("Events API Endpoints", () => {
         .delete("/api/dashboard/events/1")
         .set("Authorization", "Bearer invalid-token")
         .expect(401);
-      expect(msg).toBe("Invalid or expired token");
+      expect(msg).toBe("Invalid access token. Please sign in again.");
     });
     test("Should return 403 when user is not an admin or editor", async () => {
       const loginRes = await request(app)

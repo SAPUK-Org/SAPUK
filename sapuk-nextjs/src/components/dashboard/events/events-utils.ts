@@ -1,4 +1,4 @@
-import type { Event, EventFormValues } from "./types";
+import type { Event, EventFormValues, EventGalleryImage } from "./types";
 
 function isValidDate(value: string | null | undefined): value is string {
   if (value == null || String(value).trim() === "") return false;
@@ -54,13 +54,50 @@ export function formatEventDateTime(event: Event): string {
   return "Date TBC";
 }
 
+/**
+ * Uploaded gallery images first, then `external_links` with `kind: "image"`,
+ * excluding duplicates against each other and the cover image URL.
+ */
+export function unifiedEventGalleryImages(event: Event): EventGalleryImage[] {
+  const hasCover = Boolean(event.cover_image?.trim());
+  const coverTrimmed = event.cover_image?.trim() ?? "";
+  const raw = event.gallery ?? [];
+  const base =
+    hasCover && coverTrimmed
+      ? raw.filter((g) => g.url.trim() !== coverTrimmed)
+      : raw;
+  const seen = new Set<string>();
+  for (const g of base) {
+    seen.add(g.url.trim());
+  }
+  if (hasCover && coverTrimmed) {
+    seen.add(coverTrimmed);
+  }
+  const fromLinks: EventGalleryImage[] = [];
+  for (const link of event.external_links ?? []) {
+    if (link.kind !== "image") continue;
+    const url = link.url.trim();
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    fromLinks.push({
+      url,
+      file_name: link.label?.trim() || "Image",
+    });
+  }
+  return [...base, ...fromLinks];
+}
+
 export const defaultEventValues: EventFormValues = {
   title: "",
   description: "",
   cover_image: "",
+  dates_description: "",
   starts_at: "",
   ends_at: "",
   location: "",
   type: "",
   max_volunteers: 1,
+  is_active: true,
+  external_links: [],
+  studio_partners: [],
 };

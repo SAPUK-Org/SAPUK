@@ -27,6 +27,35 @@ export const selectResources = async (options?: {
   return rows as Resource[];
 };
 
+/** Image rows attached to public events (for marketing site). */
+export const selectImageGalleryRowsForEventIds = async (
+  eventIds: number[],
+): Promise<Map<number, { url: string; file_name: string }[]>> => {
+  const map = new Map<number, { url: string; file_name: string }[]>();
+  if (eventIds.length === 0) {
+    return map;
+  }
+  const { rows } = await db.query<{
+    attachable_id: number;
+    url: string;
+    file_name: string;
+  }>(
+    `SELECT attachable_id, url, file_name
+     FROM resources
+     WHERE attachable_type = 'event'
+       AND attachable_id = ANY($1::int[])
+       AND mime_type LIKE 'image/%'
+     ORDER BY attachable_id ASC, created_at ASC`,
+    [eventIds],
+  );
+  for (const row of rows) {
+    const list = map.get(row.attachable_id) ?? [];
+    list.push({ url: row.url, file_name: row.file_name });
+    map.set(row.attachable_id, list);
+  }
+  return map;
+};
+
 function deriveResourceType(
   mimeType: string,
 ): "image" | "document" | "video" | "other" {

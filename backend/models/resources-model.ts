@@ -1,7 +1,24 @@
 import db from "../db/connection";
 import { Resource } from "../types";
 
-export const selectResources = async () => {
+export const selectResources = async (options?: {
+  attachable_type?: string;
+  attachable_id?: number;
+}) => {
+  if (
+    options?.attachable_type != null &&
+    options.attachable_type !== "" &&
+    options.attachable_id != null
+  ) {
+    const { rows } = await db.query(
+      `SELECT id, url, mime_type, resource_type, file_name, file_key, uploaded_by, attachable_type, attachable_id, metadata, notes, created_at
+       FROM resources
+       WHERE attachable_type = $1 AND attachable_id = $2
+       ORDER BY created_at ASC`,
+      [options.attachable_type, options.attachable_id],
+    );
+    return rows as Resource[];
+  }
   const { rows } = await db.query(
     `SELECT id, url, mime_type, resource_type, file_name, file_key, uploaded_by, attachable_type, attachable_id, metadata, notes, created_at
      FROM resources
@@ -90,4 +107,15 @@ export const deleteResource = async (id: number): Promise<Resource> => {
     [id],
   );
   return rows[0] as Resource;
+};
+
+export const deleteResourcesByAttachable = async (
+  attachable_type: string,
+  attachable_id: number,
+): Promise<Resource[]> => {
+  const { rows } = await db.query(
+    `DELETE FROM resources WHERE attachable_type = $1 AND attachable_id = $2 RETURNING *`,
+    [attachable_type, attachable_id],
+  );
+  return rows as Resource[];
 };

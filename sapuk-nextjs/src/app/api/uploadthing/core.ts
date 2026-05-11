@@ -1,5 +1,24 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import { z } from "zod";
+
+/** Client sends `{}` for the library or both fields for an attachable (e.g. event). */
+const resourceUploaderInputSchema = z
+  .object({
+    attachableType: z.string().min(1).optional(),
+    attachableId: z.number().int().positive().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const hasType = data.attachableType != null;
+    const hasId = data.attachableId != null;
+    if (hasType !== hasId) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "attachableType and attachableId must both be set or both omitted",
+      });
+    }
+  });
 
 const f = createUploadthing();
 
@@ -107,9 +126,18 @@ export const ourFileRouter = {
     video: { maxFileSize: "64MB", maxFileCount: 5 },
     blob: { maxFileSize: "16MB", maxFileCount: 10 },
   })
-    .middleware(async ({ req }) => {
+    .input(resourceUploaderInputSchema)
+    .middleware(async ({ req, input }) => {
       const user = await auth(req);
       if (!user) throw new UploadThingError("Unauthorized");
+      const inp = input ?? {};
+      if (inp.attachableType != null && inp.attachableId != null) {
+        return {
+          userId: user.id,
+          attachableType: inp.attachableType,
+          attachableId: inp.attachableId,
+        };
+      }
       return { userId: user.id };
     })
     .onUploadComplete(createUploadCompleteHandler()),

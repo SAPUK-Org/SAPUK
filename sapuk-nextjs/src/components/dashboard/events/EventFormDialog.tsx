@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { EventFormValues } from "./types";
+import type { EventFormValues, EventGalleryResource } from "./types";
 import type { UseFormReturn } from "react-hook-form";
 import { EventForm } from "./EventForm";
 
@@ -21,6 +21,12 @@ type EventFormDialogProps = {
   actionError: string | null;
   actionLoading: boolean;
   onCancel: () => void;
+  pendingImageFiles: File[];
+  onPendingImageFilesChange: (files: File[]) => void;
+  galleryResources: EventGalleryResource[];
+  galleryLoading?: boolean;
+  onRemoveGalleryImage?: (resourceId: number) => void | Promise<void>;
+  galleryRemovingId?: number | null;
 };
 
 export function EventFormDialog({
@@ -33,6 +39,12 @@ export function EventFormDialog({
   actionError,
   actionLoading,
   onCancel,
+  pendingImageFiles,
+  onPendingImageFilesChange,
+  galleryResources,
+  galleryLoading,
+  onRemoveGalleryImage,
+  galleryRemovingId,
 }: EventFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -47,6 +59,12 @@ export function EventFormDialog({
           actionError={actionError}
           actionLoading={actionLoading}
           onCancel={onCancel}
+          pendingImageFiles={pendingImageFiles}
+          onPendingImageFilesChange={onPendingImageFilesChange}
+          galleryResources={galleryResources}
+          galleryLoading={galleryLoading}
+          onRemoveGalleryImage={onRemoveGalleryImage}
+          galleryRemovingId={galleryRemovingId}
         />
       </DialogContent>
     </Dialog>

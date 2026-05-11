@@ -58,9 +58,9 @@ export const defaultEventValues: EventFormValues = {
   title: "",
   description: "",
   cover_image: "",
-  starts_at: undefined,
-  ends_at: undefined,
+  starts_at: "",
+  ends_at: "",
   location: "",
   type: "",
-  max_volunteers: undefined,
+  max_volunteers: 1,
 };

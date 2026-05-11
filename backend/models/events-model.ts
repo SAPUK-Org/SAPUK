@@ -21,6 +21,7 @@ export const selectEventById = async (id: number) => {
 export const insertEvent = async (
   title: string,
   description: string,
+  cover_image: string | null,
   starts_at: Date,
   ends_at: Date,
   location: string,
@@ -30,11 +31,12 @@ export const insertEvent = async (
 ) => {
   const { rows } = await db.query(
     `
-    INSERT INTO events (title, description, starts_at, ends_at, location, type, max_volunteers, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+    INSERT INTO events (title, description, cover_image, starts_at, ends_at, location, type, max_volunteers, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *
   `,
     [
       title,
       description,
+      cover_image,
       starts_at,
       ends_at,
       location,

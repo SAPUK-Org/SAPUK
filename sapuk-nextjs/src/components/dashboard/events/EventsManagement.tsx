@@ -3,16 +3,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
+import { useUploadThing } from "@/lib/uploadthing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import type { Event, EventFormValues } from "./types";
-import { eventSchema } from "./types";
+import type { Event, EventFormValues, EventGalleryResource } from "./types";
+import { EVENT_ATTACHABLE_TYPE, eventSchema } from "./types";
 import { defaultEventValues, toDatetimeLocal } from "./events-utils";
 import { EventCard } from "./EventCard";
 import { EventFormDialog } from "./EventFormDialog";
 import { DeleteEventDialog } from "./DeleteEventDialog";
+
+function toEventApiBody(values: EventFormValues) {
+  return {
+    ...values,
+    starts_at: values.starts_at
+      ? new Date(values.starts_at).toISOString()
+      : null,
+    ends_at: values.ends_at ? new Date(values.ends_at).toISOString() : null,
+  };
+}
 
 export function EventsManagement() {
   const { token } = useAuth();
@@ -25,6 +36,17 @@ export function EventsManagement() {
   const [targetEvent, setTargetEvent] = useState<Event | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [createPendingFiles, setCreatePendingFiles] = useState<File[]>([]);
+  const [editPendingFiles, setEditPendingFiles] = useState<File[]>([]);
+  const [editGallery, setEditGallery] = useState<EventGalleryResource[]>([]);
+  const [editGalleryLoading, setEditGalleryLoading] = useState(false);
+  const [galleryRemovingId, setGalleryRemovingId] = useState<number | null>(null);
+
+  const { startUpload, isUploading } = useUploadThing("resourceUploader", {
+    onUploadError: (e) => {
+      setActionError(e.message);
+    },
+  });
 
   const fetchEvents = useCallback(async () => {
     if (!token) return;
@@ -44,9 +66,44 @@ export function EventsManagement() {
     }
   }, [token]);
 
+  const loadEditGallery = useCallback(
+    async (eventId: number) => {
+      if (!token) return;
+      setEditGalleryLoading(true);
+      const { data, ok } = await api<{ resources?: EventGalleryResource[] }>(
+        "/api/resources",
+        "GET",
+        {
+          token,
+          searchParams: {
+            attachable_type: EVENT_ATTACHABLE_TYPE,
+            attachable_id: eventId,
+          },
+        },
+      );
+      setEditGalleryLoading(false);
+      if (ok && Array.isArray(data?.resources)) {
+        setEditGallery(
+          data.resources.filter((r) => r.mime_type?.startsWith("image/")),
+        );
+      } else {
+        setEditGallery([]);
+      }
+    },
+    [token],
+  );
+
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
+
+  useEffect(() => {
+    if (!editOpen || !targetEvent?.id) {
+      setEditGallery([]);
+      return;
+    }
+    loadEditGallery(targetEvent.id);
+  }, [editOpen, targetEvent?.id, loadEditGallery]);
 
   const createForm = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
@@ -58,29 +115,70 @@ export function EventsManagement() {
     defaultValues: defaultEventValues,
   });
 
+  const formBusy = actionLoading || isUploading;
+
   const onCreateSubmit = async (values: EventFormValues) => {
     setActionError(null);
     setActionLoading(true);
-    const body = {
-      ...values,
-      starts_at: values.starts_at
-        ? new Date(values.starts_at).toISOString()
-        : null,
-      ends_at: values.ends_at ? new Date(values.ends_at).toISOString() : null,
-    };
-    const { data, ok } = await api("/api/db/events", "POST", {
-      token,
-      body,
-    });
-    setActionLoading(false);
-    if (ok) {
+    try {
+      const body = toEventApiBody(values);
+      const { data, ok } = await api<{ event?: { id: number }; msg?: string }>(
+        "/api/db/events",
+        "POST",
+        {
+          token,
+          body,
+        },
+      );
+      if (!ok) {
+        setActionError(
+          (data as { msg?: string })?.msg ?? "Failed to create event",
+        );
+        return;
+      }
+      const eventId = data?.event?.id;
+      if (eventId == null || !Number.isFinite(eventId)) {
+        setActionError("Invalid response from server");
+        return;
+      }
+
+      if (createPendingFiles.length > 0) {
+        const uploaded = await startUpload(createPendingFiles, {
+          attachableType: EVENT_ATTACHABLE_TYPE,
+          attachableId: eventId,
+        });
+        if (uploaded == null) {
+          setActionError("Image upload was cancelled or failed.");
+          return;
+        }
+        if (!values.cover_image?.trim()) {
+          const first = uploaded[0];
+          const firstUrl =
+            first &&
+            ("ufsUrl" in first && first.ufsUrl
+              ? first.ufsUrl
+              : "url" in first && first.url
+                ? first.url
+                : null);
+          if (firstUrl) {
+            await api(`/api/db/events/${eventId}`, "PUT", {
+              token,
+              body: { ...toEventApiBody(values), cover_image: firstUrl },
+            });
+          }
+        }
+      }
+
       setCreateOpen(false);
+      setCreatePendingFiles([]);
       createForm.reset(defaultEventValues);
       fetchEvents();
-    } else {
+    } catch (err) {
       setActionError(
-        (data as { msg?: string })?.msg ?? "Failed to create event",
+        err instanceof Error ? err.message : "Image upload failed",
       );
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -88,26 +186,44 @@ export function EventsManagement() {
     if (!targetEvent) return;
     setActionError(null);
     setActionLoading(true);
-    const body = {
-      ...values,
-      starts_at: values.starts_at
-        ? new Date(values.starts_at).toISOString()
-        : null,
-      ends_at: values.ends_at ? new Date(values.ends_at).toISOString() : null,
-    };
-    const { data, ok } = await api(`/api/db/events/${targetEvent.id}`, "PUT", {
-      token,
-      body,
-    });
-    setActionLoading(false);
-    if (ok) {
+    try {
+      const body = toEventApiBody(values);
+      const { data, ok } = await api<{ msg?: string }>(
+        `/api/db/events/${targetEvent.id}`,
+        "PUT",
+        {
+          token,
+          body,
+        },
+      );
+      if (!ok) {
+        setActionError(
+          (data as { msg?: string })?.msg ?? "Failed to update event",
+        );
+        return;
+      }
+
+      if (editPendingFiles.length > 0) {
+        const uploaded = await startUpload(editPendingFiles, {
+          attachableType: EVENT_ATTACHABLE_TYPE,
+          attachableId: targetEvent.id,
+        });
+        if (uploaded == null) {
+          setActionError("Image upload was cancelled or failed.");
+          return;
+        }
+      }
+
       setEditOpen(false);
+      setEditPendingFiles([]);
       setTargetEvent(null);
       fetchEvents();
-    } else {
+    } catch (err) {
       setActionError(
-        (data as { msg?: string })?.msg ?? "Failed to update event",
+        err instanceof Error ? err.message : "Image upload failed",
       );
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -134,17 +250,35 @@ export function EventsManagement() {
     }
   };
 
+  const onRemoveGalleryImage = async (resourceId: number) => {
+    if (!token || !targetEvent) return;
+    setGalleryRemovingId(resourceId);
+    setActionError(null);
+    const { data, ok } = await api(`/api/resources/${resourceId}`, "DELETE", {
+      token,
+    });
+    setGalleryRemovingId(null);
+    if (!ok) {
+      setActionError(
+        (data as { msg?: string })?.msg ?? "Failed to remove image",
+      );
+      return;
+    }
+    await loadEditGallery(targetEvent.id);
+  };
+
   const openEdit = (event: Event) => {
     setTargetEvent(event);
+    setEditPendingFiles([]);
     editForm.reset({
       title: event.title,
       description: event.description,
       cover_image: event.cover_image ?? "",
-      starts_at: event.starts_at ? toDatetimeLocal(event.starts_at) : undefined,
-      ends_at: event.ends_at ? toDatetimeLocal(event.ends_at) : undefined,
+      starts_at: event.starts_at ? toDatetimeLocal(event.starts_at) : "",
+      ends_at: event.ends_at ? toDatetimeLocal(event.ends_at) : "",
       location: event.location,
       type: event.type,
-      max_volunteers: event.max_volunteers ?? undefined,
+      max_volunteers: event.max_volunteers ?? 1,
     });
     setEditOpen(true);
   };
@@ -158,6 +292,8 @@ export function EventsManagement() {
   const handleCancelForm = () => {
     createForm.reset(defaultEventValues);
     editForm.reset(defaultEventValues);
+    setCreatePendingFiles([]);
+    setEditPendingFiles([]);
     setCreateOpen(false);
     setEditOpen(false);
     setTargetEvent(null);
@@ -176,7 +312,15 @@ export function EventsManagement() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>All events</CardTitle>
-          <Button onClick={() => setCreateOpen(true)}>Add event</Button>
+          <Button
+            onClick={() => {
+              setCreatePendingFiles([]);
+              setActionError(null);
+              setCreateOpen(true);
+            }}
+          >
+            Add event
+          </Button>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -206,26 +350,48 @@ export function EventsManagement() {
 
       <EventFormDialog
         open={createOpen}
-        onOpenChange={setCreateOpen}
+        onOpenChange={(open) => {
+          setCreateOpen(open);
+          if (!open) {
+            setCreatePendingFiles([]);
+            setActionError(null);
+          }
+        }}
         title="Create event"
         description="Add a new event. All fields are required."
         form={createForm}
         onSubmit={onCreateSubmit}
         actionError={actionError}
-        actionLoading={actionLoading}
+        actionLoading={formBusy}
         onCancel={handleCancelForm}
+        pendingImageFiles={createPendingFiles}
+        onPendingImageFilesChange={setCreatePendingFiles}
+        galleryResources={[]}
       />
 
       <EventFormDialog
         open={editOpen}
-        onOpenChange={setEditOpen}
+        onOpenChange={(open) => {
+          setEditOpen(open);
+          if (!open) {
+            setEditPendingFiles([]);
+            setTargetEvent(null);
+            setActionError(null);
+          }
+        }}
         title="Edit event"
         description="Update the event details."
         form={editForm}
         onSubmit={onEditSubmit}
         actionError={actionError}
-        actionLoading={actionLoading}
+        actionLoading={formBusy}
         onCancel={handleCancelForm}
+        pendingImageFiles={editPendingFiles}
+        onPendingImageFilesChange={setEditPendingFiles}
+        galleryResources={editGallery}
+        galleryLoading={editGalleryLoading}
+        onRemoveGalleryImage={onRemoveGalleryImage}
+        galleryRemovingId={galleryRemovingId}
       />
 
       <DeleteEventDialog

@@ -16,6 +16,7 @@ export function ResourceUploadZone({
       <div className="rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 p-6">
         <UploadDropzone
           endpoint="resourceUploader"
+          input={{}}
           onClientUploadComplete={onUploadComplete}
           onUploadError={onUploadError}
           config={{

@@ -6,6 +6,8 @@ import {
   updateEventById,
   deleteEventById,
 } from "../models/events-model";
+import { deleteResourcesByAttachable } from "../models/resources-model";
+import { UTApi } from "uploadthing/server";
 import type { Event } from "../types";
 import { logAudit } from "../utils/logAudit";
 
@@ -31,6 +33,7 @@ export const createEvent = async (
     const {
       title,
       description,
+      cover_image,
       starts_at,
       ends_at,
       location,
@@ -61,9 +64,15 @@ export const createEvent = async (
     if (!max_volunteers) {
       return res.status(400).send({ msg: "Max volunteers is required" });
     }
+    const cover =
+      typeof cover_image === "string" && cover_image.trim() === ""
+        ? null
+        : cover_image ?? null;
+
     const event = (await insertEvent(
       title,
       description,
+      cover,
       starts_at,
       ends_at,
       location,
@@ -202,6 +211,25 @@ export const deleteEvent = async (
     if (!event) {
       return res.status(404).send({ msg: "Event not found" });
     }
+    const eventResources = await deleteResourcesByAttachable(
+      "event",
+      Number(id),
+    );
+    const fileKeys = eventResources
+      .map((r) => r.file_key)
+      .filter((k): k is string => typeof k === "string" && k.length > 0);
+    if (fileKeys.length > 0) {
+      try {
+        const utapi = new UTApi();
+        await utapi.deleteFiles(fileKeys);
+      } catch (utErr) {
+        console.error(
+          "UploadThing delete failed (event resource rows already removed):",
+          utErr,
+        );
+      }
+    }
+
     const deletedEvent = (await deleteEventById(Number(id))) as
       | Event
       | undefined;

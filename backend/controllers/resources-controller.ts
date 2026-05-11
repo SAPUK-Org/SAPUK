@@ -13,7 +13,32 @@ export const getResources = async (
   next: NextFunction,
 ) => {
   try {
-    const resources = await selectResources();
+    const rawType = req.query.attachable_type;
+    const rawId = req.query.attachable_id;
+    const attachable_type =
+      typeof rawType === "string" && rawType.trim() !== "" ? rawType.trim() : undefined;
+    const hasType = attachable_type != null;
+    const hasId = rawId !== undefined && String(rawId).trim() !== "";
+
+    if (hasType !== hasId) {
+      return res.status(400).send({
+        msg: "attachable_type and attachable_id must both be provided or both omitted",
+      });
+    }
+
+    let attachable_id: number | undefined;
+    if (hasId) {
+      attachable_id = Number(rawId);
+      if (!Number.isFinite(attachable_id) || attachable_id < 1) {
+        return res.status(400).send({ msg: "Invalid attachable_id" });
+      }
+    }
+
+    const resources = await selectResources(
+      hasType && attachable_type != null && attachable_id != null
+        ? { attachable_type, attachable_id }
+        : undefined,
+    );
     res.status(200).send({ resources });
   } catch (err) {
     next(err);

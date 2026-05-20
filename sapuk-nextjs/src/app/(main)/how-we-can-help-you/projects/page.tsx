@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Event } from "@/components/dashboard/events/types";
+import { eventEarliestStart } from "@/components/dashboard/events/events-utils";
 import ProjectEventsList from "@/components/projects/ProjectEventsList";
 
 function sortEventsByStart(list: Event[]) {
   return [...list].sort((a, b) => {
-    const ta = a.starts_at ? new Date(a.starts_at).getTime() : Infinity;
-    const tb = b.starts_at ? new Date(b.starts_at).getTime() : Infinity;
+    const ta = eventEarliestStart(a) ?? Infinity;
+    const tb = eventEarliestStart(b) ?? Infinity;
     return ta - tb;
   });
 }

@@ -1,60 +1,10 @@
 import { NextResponse } from "next/server";
 
-function normalizeBackendBaseUrl(raw: string): string {
-  return raw.replace(/\/+$/, "");
-}
-
-/**
- * On Vercel, BACKEND_API_URL must be set — serverless has no localhost API.
- * Locally, default matches backend/listener default port.
- */
-function resolveBackendApiBaseUrl():
-  | { ok: true; url: string }
-  | { ok: false; reason: "missing_on_vercel" } {
-  const trimmed = process.env.BACKEND_API_URL?.trim();
-  if (trimmed) {
-    return { ok: true, url: normalizeBackendBaseUrl(trimmed) };
-  }
-  if (process.env.VERCEL === "1") {
-    return { ok: false, reason: "missing_on_vercel" };
-  }
-  return { ok: true, url: normalizeBackendBaseUrl("http://localhost:9090/api") };
-}
-
-function logAuthRouteError(method: "POST" | "GET", error: unknown): void {
-  const message = error instanceof Error ? error.message : String(error);
-  const stack = error instanceof Error ? error.stack : undefined;
-  let cause: string | undefined;
-  if (error instanceof Error && error.cause !== undefined) {
-    cause =
-      error.cause instanceof Error
-        ? error.cause.message
-        : String(error.cause);
-  }
-  console.error(`Error in /api/db/auth ${method}:`, { message, cause, stack });
-}
-
-function isLikelyFetchFailure(error: unknown): boolean {
-  if (!(error instanceof TypeError)) return false;
-  const m = error.message.toLowerCase();
-  return m.includes("fetch") || m.includes("network");
-}
+const BACKEND_API_URL =
+  process.env.BACKEND_API_URL || "http://localhost:9090/api";
 
 function rewriteAuthCookiePath(setCookie: string): string {
   return setCookie.replace(/Path=\/api\/auth/gi, "Path=/api/db/auth");
-}
-
-function missingBackendUrlResponse() {
-  console.error(
-    "/api/db/auth: BACKEND_API_URL is unset on Vercel. Set it to your public API base URL including /api (for example https://your-service.onrender.com/api).",
-  );
-  return NextResponse.json(
-    {
-      success: false,
-      message: "Login is temporarily unavailable. Please try again later.",
-    },
-    { status: 503 },
-  );
 }
 
 /**
@@ -65,12 +15,6 @@ function missingBackendUrlResponse() {
  */
 export async function POST(req: Request) {
   try {
-    const resolved = resolveBackendApiBaseUrl();
-    if (!resolved.ok) {
-      return missingBackendUrlResponse();
-    }
-    const backendBase = resolved.url;
-
     const { email, password } = await req.json();
 
     if (!email || !password) {
@@ -80,7 +24,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const backendRes = await fetch(`${backendBase}/auth/login`, {
+    const backendRes = await fetch(`${BACKEND_API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -117,23 +61,7 @@ export async function POST(req: Request) {
 
     return res;
   } catch (error) {
-    logAuthRouteError("POST", error);
-    if (error instanceof SyntaxError) {
-      return NextResponse.json(
-        { success: false, message: "Invalid request body" },
-        { status: 400 },
-      );
-    }
-    if (isLikelyFetchFailure(error)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Could not reach the login service. Please try again later.",
-        },
-        { status: 503 },
-      );
-    }
+    console.error("Error in /api/db/auth POST:", error);
     return NextResponse.json(
       { success: false, message: "An unexpected error occurred" },
       { status: 500 },
@@ -149,12 +77,6 @@ export async function POST(req: Request) {
  */
 export async function GET(req: Request) {
   try {
-    const resolved = resolveBackendApiBaseUrl();
-    if (!resolved.ok) {
-      return missingBackendUrlResponse();
-    }
-    const backendBase = resolved.url;
-
     const authHeader = req.headers.get("authorization");
 
     if (!authHeader) {
@@ -164,7 +86,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const backendRes = await fetch(`${backendBase}/users/me`, {
+    const backendRes = await fetch(`${BACKEND_API_URL}/users/me`, {
       method: "GET",
       headers: {
         Authorization: authHeader,
@@ -191,17 +113,7 @@ export async function GET(req: Request) {
       user: data?.user ?? data,
     });
   } catch (error) {
-    logAuthRouteError("GET", error);
-    if (isLikelyFetchFailure(error)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message:
-            "Could not reach the login service. Please try again later.",
-        },
-        { status: 503 },
-      );
-    }
+    console.error("Error in /api/db/auth GET:", error);
     return NextResponse.json(
       { success: false, message: "An unexpected error occurred" },
       { status: 500 },

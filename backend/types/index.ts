@@ -31,12 +31,18 @@ export type EventStudioPartner = {
   socialLinks?: EventStudioSocialLink[];
 };
 
+export type EventScheduleSlot = {
+  starts_at: string;
+  ends_at: string;
+};
+
 export type Event = {
   id: number;
   title: string;
   description: string;
   cover_image?: string | null;
   dates_description?: string | null;
+  schedule_slots?: EventScheduleSlot[];
   starts_at?: Date | null;
   ends_at?: Date | null;
   location: string;

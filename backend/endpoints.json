@@ -294,13 +294,15 @@
       ]
     },
     "POST /api/dashboard/events": {
-      "description": "Create a new event. Admin and editor only.",
+      "description": "Create a new event. Admin and editor only. Schedule: use exactly one of (1) starts_at + ends_at, (2) schedule_slots array, or (3) dates_description for recurring/TBC prose.",
       "auth": "Bearer token (admin or editor)",
       "body": {
         "title": "string",
         "description": "string",
-        "starts_at": "string (ISO date)",
-        "ends_at": "string (ISO date)",
+        "starts_at": "string (ISO date, single-range mode)",
+        "ends_at": "string (ISO date, single-range mode)",
+        "schedule_slots": "array of { starts_at, ends_at } ISO pairs (multi-slot mode)",
+        "dates_description": "string (prose/recurring mode)",
         "location": "string",
         "type": "string",
         "max_volunteers": "number"
@@ -324,8 +326,8 @@
         { "status": 400, "msg": "Request body cannot be empty" },
         { "status": 400, "msg": "Title is required" },
         { "status": 400, "msg": "Description is required" },
-        { "status": 400, "msg": "Starts at is required" },
-        { "status": 400, "msg": "Ends at is required" },
+        { "status": 400, "msg": "Provide a schedule: starts_at and ends_at, schedule_slots, or dates_description" },
+        { "status": 400, "msg": "Use only one schedule mode: single range (starts_at/ends_at), schedule_slots, or dates_description" },
         { "status": 400, "msg": "Location is required" },
         { "status": 400, "msg": "Type is required" },
         { "status": 400, "msg": "Max volunteers is required" },
@@ -365,13 +367,15 @@
       ]
     },
     "PUT /api/dashboard/events/:id": {
-      "description": "Update an event by ID. Full replacement — all body fields required. Admin and editor only.",
+      "description": "Update an event by ID. Full replacement — all body fields required. Admin and editor only. Schedule: use exactly one of (1) starts_at + ends_at, (2) schedule_slots array, or (3) dates_description.",
       "auth": "Bearer token (admin or editor)",
       "body": {
         "title": "string",
         "description": "string",
-        "starts_at": "string (ISO date)",
-        "ends_at": "string (ISO date)",
+        "starts_at": "string (ISO date, single-range mode)",
+        "ends_at": "string (ISO date, single-range mode)",
+        "schedule_slots": "array of { starts_at, ends_at } ISO pairs (multi-slot mode)",
+        "dates_description": "string (prose/recurring mode)",
         "location": "string",
         "type": "string",
         "max_volunteers": "number"
@@ -396,8 +400,8 @@
         { "status": 400, "msg": "Request body cannot be empty" },
         { "status": 400, "msg": "Title is required" },
         { "status": 400, "msg": "Description is required" },
-        { "status": 400, "msg": "Starts at is required" },
-        { "status": 400, "msg": "Ends at is required" },
+        { "status": 400, "msg": "Provide a schedule: starts_at and ends_at, schedule_slots, or dates_description" },
+        { "status": 400, "msg": "Use only one schedule mode: single range (starts_at/ends_at), schedule_slots, or dates_description" },
         { "status": 400, "msg": "Location is required" },
         { "status": 400, "msg": "Type is required" },
         { "status": 400, "msg": "Max volunteers is required" },

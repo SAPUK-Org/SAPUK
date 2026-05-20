@@ -51,6 +51,7 @@ const seed = async ({ users }: SeedData) => {
         description TEXT NOT NULL,
         cover_image TEXT,
         dates_description TEXT,
+        schedule_slots JSONB NOT NULL DEFAULT '[]'::jsonb,
         starts_at TIMESTAMP WITH TIME ZONE,
         ends_at TIMESTAMP WITH TIME ZONE,
         location TEXT NOT NULL,
@@ -163,12 +164,13 @@ const seed = async ({ users }: SeedData) => {
     await db.query(insertUsersQueryString);
 
     const insertEventsQueryString = format(
-      `INSERT INTO events (title, description, cover_image, dates_description, starts_at, ends_at, location, type, max_volunteers, is_active, external_links, studio_partners, created_by) VALUES %L RETURNING id`,
+      `INSERT INTO events (title, description, cover_image, dates_description, schedule_slots, starts_at, ends_at, location, type, max_volunteers, is_active, external_links, studio_partners, created_by) VALUES %L RETURNING id`,
       events.map((event) => [
         event.title,
         event.description,
         event.cover_image ?? null,
         event.dates_description ?? null,
+        JSON.stringify(event.schedule_slots ?? []),
         event.starts_at ?? null,
         event.ends_at ?? null,
         event.location,

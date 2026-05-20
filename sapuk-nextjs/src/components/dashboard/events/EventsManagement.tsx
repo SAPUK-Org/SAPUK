@@ -10,7 +10,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { Event, EventFormValues, EventGalleryResource } from "./types";
 import { EVENT_ATTACHABLE_TYPE, eventSchema } from "./types";
-import { defaultEventValues, toDatetimeLocal } from "./events-utils";
+import {
+  defaultEventValues,
+  eventEarliestStart,
+  inferScheduleMode,
+  toDatetimeLocal,
+} from "./events-utils";
 import { EventCard } from "./EventCard";
 import { EventFormDialog } from "./EventFormDialog";
 import { DeleteEventDialog } from "./DeleteEventDialog";
@@ -48,17 +53,43 @@ function toEventApiBody(values: EventFormValues) {
         })),
     }));
 
-  const datesDesc = (values.dates_description ?? "").trim() || null;
+  const { schedule_mode, ...rest } = values;
+
+  if (schedule_mode === "single") {
+    return {
+      ...rest,
+      external_links,
+      studio_partners,
+      dates_description: null,
+      schedule_slots: [],
+      starts_at: new Date(values.starts_at).toISOString(),
+      ends_at: new Date(values.ends_at).toISOString(),
+    };
+  }
+
+  if (schedule_mode === "multiple") {
+    return {
+      ...rest,
+      external_links,
+      studio_partners,
+      dates_description: null,
+      starts_at: null,
+      ends_at: null,
+      schedule_slots: values.schedule_slots.map((slot) => ({
+        starts_at: new Date(slot.starts_at).toISOString(),
+        ends_at: new Date(slot.ends_at).toISOString(),
+      })),
+    };
+  }
 
   return {
-    ...values,
+    ...rest,
     external_links,
     studio_partners,
-    dates_description: datesDesc,
-    starts_at: values.starts_at
-      ? new Date(values.starts_at).toISOString()
-      : null,
-    ends_at: values.ends_at ? new Date(values.ends_at).toISOString() : null,
+    dates_description: (values.dates_description ?? "").trim() || null,
+    schedule_slots: [],
+    starts_at: null,
+    ends_at: null,
   };
 }
 
@@ -308,13 +339,29 @@ export function EventsManagement() {
   const openEdit = (event: Event) => {
     setTargetEvent(event);
     setEditPendingFiles([]);
+    const mode = inferScheduleMode(event);
     editForm.reset({
       title: event.title,
       description: event.description,
       cover_image: event.cover_image ?? "",
-      dates_description: event.dates_description ?? "",
-      starts_at: event.starts_at ? toDatetimeLocal(event.starts_at) : "",
-      ends_at: event.ends_at ? toDatetimeLocal(event.ends_at) : "",
+      schedule_mode: mode,
+      dates_description:
+        mode === "prose" ? (event.dates_description ?? "") : "",
+      starts_at:
+        mode === "single" && event.starts_at
+          ? toDatetimeLocal(event.starts_at)
+          : "",
+      ends_at:
+        mode === "single" && event.ends_at
+          ? toDatetimeLocal(event.ends_at)
+          : "",
+      schedule_slots:
+        mode === "multiple"
+          ? (event.schedule_slots ?? []).map((slot) => ({
+              starts_at: toDatetimeLocal(slot.starts_at),
+              ends_at: toDatetimeLocal(slot.ends_at),
+            }))
+          : [],
       location: event.location,
       type: event.type,
       max_volunteers: event.max_volunteers ?? 1,
@@ -385,10 +432,8 @@ export function EventsManagement() {
   };
 
   const sortedEvents = [...events].sort((a, b) => {
-    const aTime = a.starts_at ? new Date(a.starts_at).getTime() : NaN;
-    const bTime = b.starts_at ? new Date(b.starts_at).getTime() : NaN;
-    const aVal = Number.isNaN(aTime) ? Infinity : aTime;
-    const bVal = Number.isNaN(bTime) ? Infinity : bTime;
+    const aVal = eventEarliestStart(a) ?? Infinity;
+    const bVal = eventEarliestStart(b) ?? Infinity;
     return aVal - bVal;
   });
 

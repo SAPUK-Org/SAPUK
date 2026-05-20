@@ -27,9 +27,11 @@ describe("Public events API", () => {
         expect(Array.isArray(event.gallery)).toBe(true);
         expect(Array.isArray(event.external_links)).toBe(true);
         expect(Array.isArray(event.studio_partners)).toBe(true);
+        expect(Array.isArray(event.schedule_slots)).toBe(true);
       });
       const ids = events.map((e: Event) => e.id);
       expect(ids).not.toContain(5);
+      expect(ids).toContain(6);
     });
   });
 
@@ -38,6 +40,7 @@ describe("Public events API", () => {
       const { body } = await request(app).get("/api/public/events/1").expect(200);
       expect(body.event).toBeDefined();
       expect(body.event.id).toBe(1);
+      expect(Array.isArray(body.event.schedule_slots)).toBe(true);
       expect(Array.isArray(body.gallery)).toBe(true);
     });
 

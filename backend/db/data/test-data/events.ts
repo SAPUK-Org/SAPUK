@@ -91,4 +91,28 @@ export const events: Event[] = [
     created_at: new Date(),
     updated_at: new Date(),
   },
+  {
+    id: 6,
+    title: "Weekend Open Days",
+    description: "Two-day open house with staggered sessions.",
+    location: "Community Hub",
+    type: "Community Event",
+    schedule_slots: [
+      {
+        starts_at: new Date("2025-07-05T10:00:00Z").toISOString(),
+        ends_at: new Date("2025-07-05T14:00:00Z").toISOString(),
+      },
+      {
+        starts_at: new Date("2025-07-06T11:00:00Z").toISOString(),
+        ends_at: new Date("2025-07-06T15:00:00Z").toISOString(),
+      },
+    ],
+    max_volunteers: 12,
+    created_by: 1,
+    is_active: true,
+    external_links: [],
+    studio_partners: [],
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
 ];

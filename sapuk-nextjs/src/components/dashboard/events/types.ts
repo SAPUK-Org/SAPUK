@@ -38,14 +38,22 @@ export type EventGalleryImage = {
   file_name: string;
 };
 
+export type EventScheduleSlot = {
+  starts_at: string;
+  ends_at: string;
+};
+
+export type EventScheduleMode = "single" | "multiple" | "prose";
+
 export type Event = {
   id: number;
   title: string;
   description: string;
   cover_image?: string | null;
   dates_description?: string | null;
-  starts_at?: string;
-  ends_at?: string;
+  schedule_slots?: EventScheduleSlot[];
+  starts_at?: string | null;
+  ends_at?: string | null;
   location: string;
   type: string;
   max_volunteers?: number;
@@ -95,16 +103,25 @@ const eventExternalLinkFormSchema = z.object({
   kind: z.enum(["web", "tiktok", "image"]),
 });
 
+const eventScheduleSlotFormSchema = z.object({
+  starts_at: z.string(),
+  ends_at: z.string(),
+});
+
 export const eventSchema = z
   .object({
     title: z.string().min(1, "Title is required"),
     description: z.string().min(1, "Description is required"),
     cover_image: z.string().optional(),
-    /** Free text for recurring dates, multiple sessions, or TBC. */
+    /** UI-only — not sent to API. */
+    schedule_mode: z.enum(["single", "multiple", "prose"]),
+    /** Prose / recurring schedule (prose mode only). */
     dates_description: z.string().optional(),
-    /** Optional single session — use datetime-local (YYYY-MM-DDTHH:mm). Leave both blank if unknown. */
+    /** Single session — datetime-local (single mode). */
     starts_at: z.string(),
     ends_at: z.string(),
+    /** Multiple sessions (multiple mode). */
+    schedule_slots: z.array(eventScheduleSlotFormSchema),
     location: z.string().min(1, "Location is required"),
     type: z.string().min(1, "Type is required"),
     max_volunteers: z.number().int().min(1, "Max volunteers must be at least 1"),
@@ -165,22 +182,87 @@ export const eventSchema = z
       });
     });
 
-    const start = data.starts_at?.trim() ?? "";
-    const end = data.ends_at?.trim() ?? "";
-    if (!start && !end) return;
-    if (!start) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Add a start date/time, or clear both fields",
-        path: ["starts_at"],
-      });
+    if (data.schedule_mode === "single") {
+      const start = data.starts_at?.trim() ?? "";
+      const end = data.ends_at?.trim() ?? "";
+      if (!start) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Start date/time is required",
+          path: ["starts_at"],
+        });
+      }
+      if (!end) {
+        ctx.addIssue({
+          code: "custom",
+          message: "End date/time is required",
+          path: ["ends_at"],
+        });
+      }
+      if (start && end) {
+        const s = new Date(start);
+        const e = new Date(end);
+        if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && e < s) {
+          ctx.addIssue({
+            code: "custom",
+            message: "End must be on or after start",
+            path: ["ends_at"],
+          });
+        }
+      }
+      return;
     }
-    if (!end) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Add an end date/time, or clear both fields",
-        path: ["ends_at"],
+
+    if (data.schedule_mode === "multiple") {
+      if (data.schedule_slots.length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Add at least one session",
+          path: ["schedule_slots"],
+        });
+        return;
+      }
+      data.schedule_slots.forEach((slot, i) => {
+        const start = slot.starts_at?.trim() ?? "";
+        const end = slot.ends_at?.trim() ?? "";
+        if (!start) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Start date/time is required",
+            path: ["schedule_slots", i, "starts_at"],
+          });
+        }
+        if (!end) {
+          ctx.addIssue({
+            code: "custom",
+            message: "End date/time is required",
+            path: ["schedule_slots", i, "ends_at"],
+          });
+        }
+        if (start && end) {
+          const s = new Date(start);
+          const e = new Date(end);
+          if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && e < s) {
+            ctx.addIssue({
+              code: "custom",
+              message: "End must be on or after start",
+              path: ["schedule_slots", i, "ends_at"],
+            });
+          }
+        }
       });
+      return;
+    }
+
+    if (data.schedule_mode === "prose") {
+      const desc = (data.dates_description ?? "").trim();
+      if (!desc) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Dates description is required for recurring or TBC schedules",
+          path: ["dates_description"],
+        });
+      }
     }
   });
 

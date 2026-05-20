@@ -1,4 +1,10 @@
-import type { Event, EventFormValues, EventGalleryImage } from "./types";
+import type {
+  Event,
+  EventFormValues,
+  EventGalleryImage,
+  EventScheduleMode,
+  EventScheduleSlot,
+} from "./types";
 
 function isValidDate(value: string | null | undefined): value is string {
   if (value == null || String(value).trim() === "") return false;
@@ -34,9 +40,43 @@ export function formatTimeRange(
   return `${s.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} – ${e.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+export function inferScheduleMode(event: Event): EventScheduleMode {
+  const slots = event.schedule_slots ?? [];
+  if (slots.length > 0) return "multiple";
+  if ((event.dates_description ?? "").trim()) return "prose";
+  if (isValidDate(event.starts_at ?? undefined)) return "single";
+  return "prose";
+}
+
+export function eventEarliestStart(event: Event): number | null {
+  if (isValidDate(event.starts_at ?? undefined)) {
+    return new Date(event.starts_at as string).getTime();
+  }
+  const slots = event.schedule_slots ?? [];
+  let min: number | null = null;
+  for (const slot of slots) {
+    if (!isValidDate(slot.starts_at)) continue;
+    const t = new Date(slot.starts_at).getTime();
+    if (min === null || t < min) min = t;
+  }
+  return min;
+}
+
+export function formatScheduleSlot(slot: EventScheduleSlot): string {
+  if (!isValidDate(slot.starts_at) || !isValidDate(slot.ends_at)) {
+    return "Date TBC";
+  }
+  return `${formatDate(slot.starts_at)}, ${formatTimeRange(slot.starts_at, slot.ends_at)}`;
+}
+
 export function formatEventDateTime(event: Event): string {
-  const hasStart = isValidDate(event.starts_at);
-  const hasEnd = isValidDate(event.ends_at);
+  const slots = event.schedule_slots ?? [];
+  if (slots.length > 0) {
+    return slots.map(formatScheduleSlot).join(" · ");
+  }
+
+  const hasStart = isValidDate(event.starts_at ?? undefined);
+  const hasEnd = isValidDate(event.ends_at ?? undefined);
   if (!hasStart && !hasEnd) {
     const desc = event.dates_description?.trim();
     return desc || "Date TBC";
@@ -91,9 +131,11 @@ export const defaultEventValues: EventFormValues = {
   title: "",
   description: "",
   cover_image: "",
+  schedule_mode: "single",
   dates_description: "",
   starts_at: "",
   ends_at: "",
+  schedule_slots: [],
   location: "",
   type: "",
   max_volunteers: 1,

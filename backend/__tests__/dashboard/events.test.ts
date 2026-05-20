@@ -40,6 +40,7 @@ describe("Events API Endpoints", () => {
         expect(event.created_by).toBeDefined();
         expect(event.created_at).toBeDefined();
         expect(event.updated_at).toBeDefined();
+        expect(Array.isArray(event.schedule_slots)).toBe(true);
         expect(Array.isArray(event.gallery)).toBe(true);
       });
     });
@@ -202,9 +203,155 @@ describe("Events API Endpoints", () => {
         .expect(201);
       expect(body.event.starts_at).toBeNull();
       expect(body.event.ends_at).toBeNull();
+      expect(body.event.schedule_slots).toEqual([]);
       expect(body.event.dates_description).toBe(
         "June 2026 and July 2026 — exact days TBC",
       );
+    });
+    test("Should return 201 when schedule_slots are provided without top-level timestamps", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const slotStart = new Date("2025-08-01T10:00:00Z");
+      const slotEnd = new Date("2025-08-01T14:00:00Z");
+      const { body } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Multi-day event",
+          description: "Two sessions",
+          schedule_slots: [
+            { starts_at: slotStart, ends_at: slotEnd },
+            {
+              starts_at: new Date("2025-08-02T11:00:00Z"),
+              ends_at: new Date("2025-08-02T15:00:00Z"),
+            },
+          ],
+          location: "Community Hub",
+          type: "Workshop",
+          max_volunteers: 8,
+        })
+        .expect(201);
+      expect(body.event.starts_at).toBeNull();
+      expect(body.event.ends_at).toBeNull();
+      expect(body.event.dates_description).toBeNull();
+      expect(body.event.schedule_slots).toHaveLength(2);
+      expect(body.event.schedule_slots[0].starts_at).toEqual(
+        slotStart.toISOString(),
+      );
+    });
+    test("Should return 400 when mixing starts_at with schedule_slots", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Mixed schedule",
+          description: "Invalid",
+          starts_at: new Date(),
+          ends_at: new Date(),
+          schedule_slots: [
+            {
+              starts_at: new Date("2025-08-01T10:00:00Z"),
+              ends_at: new Date("2025-08-01T14:00:00Z"),
+            },
+          ],
+          location: "Hub",
+          type: "Workshop",
+          max_volunteers: 5,
+        })
+        .expect(400);
+      expect(msg).toBe(
+        "Use only one schedule mode: single range (starts_at/ends_at), schedule_slots, or dates_description",
+      );
+    });
+    test("Should return 400 when mixing dates_description with schedule_slots", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Mixed prose and slots",
+          description: "Invalid",
+          dates_description: "Every month",
+          schedule_slots: [
+            {
+              starts_at: new Date("2025-08-01T10:00:00Z"),
+              ends_at: new Date("2025-08-01T14:00:00Z"),
+            },
+          ],
+          location: "Hub",
+          type: "Workshop",
+          max_volunteers: 5,
+        })
+        .expect(400);
+      expect(msg).toBe(
+        "Use only one schedule mode: single range (starts_at/ends_at), schedule_slots, or dates_description",
+      );
+    });
+    test("Should return 400 when no schedule mode is provided", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "No schedule",
+          description: "Missing dates",
+          location: "Hub",
+          type: "Workshop",
+          max_volunteers: 5,
+        })
+        .expect(400);
+      expect(msg).toBe(
+        "Provide a schedule: starts_at and ends_at, schedule_slots, or dates_description",
+      );
+    });
+    test("Should return 400 when schedule slot ends before it starts", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Bad slot",
+          description: "Invalid slot range",
+          schedule_slots: [
+            {
+              starts_at: new Date("2025-08-01T14:00:00Z"),
+              ends_at: new Date("2025-08-01T10:00:00Z"),
+            },
+          ],
+          location: "Hub",
+          type: "Workshop",
+          max_volunteers: 5,
+        })
+        .expect(400);
+      expect(msg).toBe("schedule_slots[0].ends_at must be on or after starts_at");
     });
     test("Should return 401 when no token is provided", async () => {
       const {
@@ -285,6 +432,7 @@ describe("Events API Endpoints", () => {
       expect(event.created_by).toBeDefined();
       expect(event.created_at).toBeDefined();
       expect(event.updated_at).toBeDefined();
+      expect(Array.isArray(event.schedule_slots)).toBe(true);
       expect(event.id).toBe(1);
     });
     test("Should return 400 when event ID is not a number", async () => {
@@ -446,6 +594,8 @@ describe("Events API Endpoints", () => {
           title: "Updated Event Title",
           description: "Updated Description",
           cover_image: "https://example.com/cover-image.jpg",
+          dates_description: null,
+          schedule_slots: [],
           starts_at: new Date(),
           ends_at: new Date(),
           location: "Test Location",

@@ -22,7 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { EventFormProps, EventFormValues } from "./types";
+import type {
+  EventFormProps,
+  EventFormValues,
+  EventScheduleMode,
+} from "./types";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
 const MAX_GALLERY_IMAGES = 10;
@@ -263,6 +269,34 @@ export function EventForm({
     control: form.control,
     name: "studio_partners",
   });
+
+  const {
+    fields: slotFields,
+    append: appendSlot,
+    remove: removeSlot,
+  } = useFieldArray({
+    control: form.control,
+    name: "schedule_slots",
+  });
+
+  const scheduleMode = form.watch("schedule_mode");
+
+  const applyScheduleMode = (mode: EventScheduleMode) => {
+    form.setValue("schedule_mode", mode);
+    if (mode !== "single") {
+      form.setValue("starts_at", "");
+      form.setValue("ends_at", "");
+    }
+    if (mode !== "multiple") {
+      form.setValue("schedule_slots", []);
+    }
+    if (mode !== "prose") {
+      form.setValue("dates_description", "");
+    }
+    if (mode === "multiple" && form.getValues("schedule_slots").length === 0) {
+      appendSlot({ starts_at: "", ends_at: "" });
+    }
+  };
 
   const externalLinks = form.watch("external_links") ?? [];
 
@@ -733,40 +767,177 @@ export function EventForm({
           )}
         </div>
         <div className="space-y-3 rounded-lg border border-zinc-300/80 bg-zinc-100/50 p-3">
-          <FormLabel className="text-base">Schedule (optional)</FormLabel>
+          <FormLabel className="text-base">Schedule</FormLabel>
           <p className="text-xs text-muted-foreground">
-            Use the text area for several dates, recurring wording, or when
-            exact times are not fixed yet. Optionally add one primary start and
-            end below for sorting and a single-session line on the public page.
+            Choose one schedule type: a single session, multiple sessions with
+            fixed dates, or a text description for recurring / TBC dates.
           </p>
           <FormField
             control={form.control}
-            name="dates_description"
+            name="schedule_mode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Dates description</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder='e.g. "Last Saturday and Sunday of each month" or list specific dates'
-                    rows={3}
-                    {...field}
-                    value={field.value ?? ""}
-                  />
+                  <RadioGroup
+                    value={field.value}
+                    onValueChange={(v) =>
+                      applyScheduleMode(v as EventScheduleMode)
+                    }
+                    className="flex flex-col gap-2 sm:flex-row sm:flex-wrap"
+                    disabled={actionLoading}
+                  >
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="single" id="schedule-single" />
+                      <Label htmlFor="schedule-single" className="font-normal">
+                        Single session
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem
+                        value="multiple"
+                        id="schedule-multiple"
+                      />
+                      <Label
+                        htmlFor="schedule-multiple"
+                        className="font-normal"
+                      >
+                        Multiple sessions
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="prose" id="schedule-prose" />
+                      <Label htmlFor="schedule-prose" className="font-normal">
+                        Recurring / TBC (text)
+                      </Label>
+                    </div>
+                  </RadioGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {scheduleMode === "single" ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="starts_at"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="datetime-local"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ends_at"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="datetime-local"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          ) : null}
+          {scheduleMode === "multiple" ? (
+            <div className="space-y-3">
+              {slotFields.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No sessions yet. Add at least one.
+                </p>
+              ) : (
+                <ul className="space-y-3">
+                  {slotFields.map((row, i) => (
+                    <li
+                      key={row.id}
+                      className="grid grid-cols-1 gap-3 rounded-md border border-zinc-200 bg-background p-3 sm:grid-cols-[1fr_1fr_auto]"
+                    >
+                      <FormField
+                        control={form.control}
+                        name={`schedule_slots.${i}.starts_at`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Session {i + 1} start</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="datetime-local"
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`schedule_slots.${i}.ends_at`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Session {i + 1} end</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="datetime-local"
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex items-end sm:pb-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={actionLoading || slotFields.length <= 1}
+                          onClick={() => removeSlot(i)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={actionLoading}
+                onClick={() => appendSlot({ starts_at: "", ends_at: "" })}
+              >
+                Add session
+              </Button>
+            </div>
+          ) : null}
+          {scheduleMode === "prose" ? (
             <FormField
               control={form.control}
-              name="starts_at"
+              name="dates_description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Primary start (optional)</FormLabel>
+                  <FormLabel>Dates description</FormLabel>
                   <FormControl>
-                    <Input
-                      type="datetime-local"
+                    <Textarea
+                      placeholder='e.g. "Last Saturday and Sunday of each month"'
+                      rows={3}
                       {...field}
                       value={field.value ?? ""}
                     />
@@ -775,24 +946,7 @@ export function EventForm({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="ends_at"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Primary end (optional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="datetime-local"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          ) : null}
         </div>
         <FormField
           control={form.control}

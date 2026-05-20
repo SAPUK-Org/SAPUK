@@ -144,11 +144,6 @@ export default function ProjectEventsList({
                           <p className="text-sm text-primary md:text-base">
                             {formatEventDateTime(event)}
                           </p>
-                          {event.dates_description ? (
-                            <p className="text-sm text-primary md:text-base">
-                              {event.dates_description}
-                            </p>
-                          ) : null}
                           <p className="text-sm text-primary md:text-base">
                             {event.location}
                             {event.max_volunteers != null
@@ -176,11 +171,6 @@ export default function ProjectEventsList({
                         <p className="text-sm text-primary md:text-base">
                           {formatEventDateTime(event)}
                         </p>
-                        {event.dates_description ? (
-                          <p className="text-sm text-primary md:text-base">
-                            {event.dates_description}
-                          </p>
-                        ) : null}
                         <p className="text-sm text-primary md:text-base">
                           {event.location}
                           {event.max_volunteers != null

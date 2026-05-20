@@ -13,10 +13,7 @@ import { UTApi } from "uploadthing/server";
 import type { Event } from "../types";
 import { logAudit } from "../utils/logAudit";
 import { parseExternalLinks, parseStudioPartners } from "../utils/parseEventMedia";
-import {
-  normalizeDatesDescription,
-  parseOptionalTimestamp,
-} from "../utils/eventDates";
+import { resolveEventSchedule } from "../utils/eventDates";
 
 export const getEvents = async (
   req: Request,
@@ -88,6 +85,7 @@ export const createEvent = async (
       description,
       cover_image,
       dates_description,
+      schedule_slots,
       starts_at,
       ends_at,
       location,
@@ -123,22 +121,6 @@ export const createEvent = async (
     const active =
       typeof is_active === "boolean" ? is_active : true;
 
-    const parsedStart = parseOptionalTimestamp(starts_at, "starts_at");
-    if (!parsedStart.ok) {
-      return res.status(400).send({ msg: parsedStart.msg });
-    }
-    const parsedEnd = parseOptionalTimestamp(ends_at, "ends_at");
-    if (!parsedEnd.ok) {
-      return res.status(400).send({ msg: parsedEnd.msg });
-    }
-    const startVal = parsedStart.value;
-    const endVal = parsedEnd.value;
-    if ((startVal === null) !== (endVal === null)) {
-      return res.status(400).send({
-        msg: "Provide both starts_at and ends_at, or omit both / use null for neither",
-      });
-    }
-
     const parsedLinks = parseExternalLinks(external_links);
     if (!parsedLinks.ok) {
       return res.status(400).send({ msg: parsedLinks.msg });
@@ -148,15 +130,24 @@ export const createEvent = async (
       return res.status(400).send({ msg: parsedStudios.msg });
     }
 
-    const datesDesc = normalizeDatesDescription(dates_description);
+    const schedule = resolveEventSchedule({
+      starts_at,
+      ends_at,
+      schedule_slots,
+      dates_description,
+    });
+    if (!schedule.ok) {
+      return res.status(400).send({ msg: schedule.msg });
+    }
 
     const event = (await insertEvent(
       title,
       description,
       cover,
-      datesDesc,
-      startVal,
-      endVal,
+      schedule.dates_description,
+      schedule.schedule_slots,
+      schedule.starts_at,
+      schedule.ends_at,
       location,
       type,
       max_volunteers,
@@ -211,6 +202,7 @@ export const updateEvent = async (
     description,
     cover_image,
     dates_description,
+    schedule_slots,
     starts_at,
     ends_at,
     location,
@@ -277,29 +269,28 @@ export const updateEvent = async (
     const endRaw = Object.prototype.hasOwnProperty.call(req.body, "ends_at")
       ? ends_at
       : event.ends_at;
-    const parsedStart = parseOptionalTimestamp(startRaw, "starts_at");
-    if (!parsedStart.ok) {
-      return res.status(400).send({ msg: parsedStart.msg });
-    }
-    const parsedEnd = parseOptionalTimestamp(endRaw, "ends_at");
-    if (!parsedEnd.ok) {
-      return res.status(400).send({ msg: parsedEnd.msg });
-    }
-    const startVal = parsedStart.value;
-    const endVal = parsedEnd.value;
-    if ((startVal === null) !== (endVal === null)) {
-      return res.status(400).send({
-        msg: "Provide both starts_at and ends_at, or omit both / use null for neither",
-      });
-    }
-
+    const slotsRaw = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "schedule_slots",
+    )
+      ? schedule_slots
+      : (event.schedule_slots ?? []);
     const datesDescRaw = Object.prototype.hasOwnProperty.call(
       req.body,
       "dates_description",
     )
       ? dates_description
       : event.dates_description;
-    const datesDesc = normalizeDatesDescription(datesDescRaw);
+
+    const schedule = resolveEventSchedule({
+      starts_at: startRaw,
+      ends_at: endRaw,
+      schedule_slots: slotsRaw,
+      dates_description: datesDescRaw,
+    });
+    if (!schedule.ok) {
+      return res.status(400).send({ msg: schedule.msg });
+    }
 
     const updatedEvent = (await updateEventById(
       Number(id),
@@ -308,9 +299,10 @@ export const updateEvent = async (
       typeof cover_image === "string" && cover_image.trim() === ""
         ? null
         : cover_image ?? null,
-      datesDesc,
-      startVal,
-      endVal,
+      schedule.dates_description,
+      schedule.schedule_slots,
+      schedule.starts_at,
+      schedule.ends_at,
       location,
       type,
       max_volunteers,

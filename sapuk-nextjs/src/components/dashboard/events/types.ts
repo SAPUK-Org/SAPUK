@@ -108,6 +108,33 @@ const eventScheduleSlotFormSchema = z.object({
   ends_at: z.string(),
 });
 
+type ScheduleModeInput = {
+  schedule_mode: EventScheduleMode;
+  dates_description?: string;
+  starts_at: string;
+  ends_at: string;
+  schedule_slots: { starts_at: string; ends_at: string }[];
+};
+
+/** Align validation/payload with the schedule UI the user actually filled in. */
+export function resolveEffectiveScheduleMode(
+  data: ScheduleModeInput,
+): EventScheduleMode {
+  if (data.schedule_mode === "prose") return "prose";
+  if (data.schedule_mode === "multiple") return "multiple";
+
+  const desc = (data.dates_description ?? "").trim();
+  const hasSingle =
+    (data.starts_at ?? "").trim() !== "" || (data.ends_at ?? "").trim() !== "";
+  const hasSlots = (data.schedule_slots ?? []).some(
+    (s) => (s.starts_at ?? "").trim() !== "" || (s.ends_at ?? "").trim() !== "",
+  );
+
+  if (desc && !hasSingle && !hasSlots) return "prose";
+
+  return "single";
+}
+
 export const eventSchema = z
   .object({
     title: z.string().min(1, "Title is required"),
@@ -199,7 +226,21 @@ export const eventSchema = z
       });
     });
 
-    if (data.schedule_mode === "single") {
+    const scheduleMode = resolveEffectiveScheduleMode(data);
+
+    if (scheduleMode === "prose") {
+      const desc = (data.dates_description ?? "").trim();
+      if (!desc) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Dates description is required for recurring or TBC schedules",
+          path: ["dates_description"],
+        });
+      }
+      return;
+    }
+
+    if (scheduleMode === "single") {
       const start = data.starts_at?.trim() ?? "";
       const end = data.ends_at?.trim() ?? "";
       if (!start) {
@@ -230,7 +271,7 @@ export const eventSchema = z
       return;
     }
 
-    if (data.schedule_mode === "multiple") {
+    if (scheduleMode === "multiple") {
       if (data.schedule_slots.length === 0) {
         ctx.addIssue({
           code: "custom",
@@ -269,17 +310,6 @@ export const eventSchema = z
         }
       });
       return;
-    }
-
-    if (data.schedule_mode === "prose") {
-      const desc = (data.dates_description ?? "").trim();
-      if (!desc) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Dates description is required for recurring or TBC schedules",
-          path: ["dates_description"],
-        });
-      }
     }
   });
 

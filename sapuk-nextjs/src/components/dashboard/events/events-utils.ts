@@ -5,6 +5,7 @@ import type {
   EventScheduleMode,
   EventScheduleSlot,
 } from "./types";
+import { resolveEffectiveScheduleMode } from "./types";
 
 function isValidDate(value: string | null | undefined): value is string {
   if (value == null || String(value).trim() === "") return false;
@@ -212,7 +213,9 @@ export function toEventApiBody(values: EventFormValues) {
     studio_partners,
   };
 
-  if (values.schedule_mode === "single") {
+  const scheduleMode = resolveEffectiveScheduleMode(values);
+
+  if (scheduleMode === "single") {
     const starts_at = toEventIsoTimestamp(values.starts_at);
     const ends_at = toEventIsoTimestamp(values.ends_at);
     return {
@@ -224,7 +227,7 @@ export function toEventApiBody(values: EventFormValues) {
     };
   }
 
-  if (values.schedule_mode === "multiple") {
+  if (scheduleMode === "multiple") {
     return {
       ...base,
       dates_description: null,

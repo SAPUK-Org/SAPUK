@@ -27,6 +27,7 @@ import type {
   EventFormValues,
   EventScheduleMode,
 } from "./types";
+import { resolveEffectiveScheduleMode } from "./types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
@@ -281,10 +282,26 @@ export function EventForm({
 
   const locationFields = form.watch("location") ?? [""];
 
-  const scheduleMode = form.watch("schedule_mode");
+  const scheduleModeWatch = form.watch([
+    "schedule_mode",
+    "dates_description",
+    "starts_at",
+    "ends_at",
+    "schedule_slots",
+  ]);
+  const scheduleMode = resolveEffectiveScheduleMode({
+    schedule_mode:
+      (scheduleModeWatch[0] as EventScheduleMode | undefined) ?? "single",
+    dates_description: scheduleModeWatch[1] as string | undefined,
+    starts_at: (scheduleModeWatch[2] as string | undefined) ?? "",
+    ends_at: (scheduleModeWatch[3] as string | undefined) ?? "",
+    schedule_slots:
+      (scheduleModeWatch[4] as { starts_at: string; ends_at: string }[] | undefined) ??
+      [],
+  });
 
   const applyScheduleMode = (mode: EventScheduleMode) => {
-    form.setValue("schedule_mode", mode);
+    form.setValue("schedule_mode", mode, { shouldValidate: true });
     if (mode !== "single") {
       form.setValue("starts_at", "");
       form.setValue("ends_at", "");
@@ -782,9 +799,11 @@ export function EventForm({
                 <FormControl>
                   <RadioGroup
                     value={field.value}
-                    onValueChange={(v) =>
-                      applyScheduleMode(v as EventScheduleMode)
-                    }
+                    onValueChange={(v) => {
+                      const mode = v as EventScheduleMode;
+                      field.onChange(mode);
+                      applyScheduleMode(mode);
+                    }}
                     className="flex flex-col gap-2 sm:flex-row sm:flex-wrap"
                     disabled={actionLoading}
                   >

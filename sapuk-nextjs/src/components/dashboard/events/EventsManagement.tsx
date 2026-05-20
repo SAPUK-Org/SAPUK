@@ -7,7 +7,7 @@ import { useUploadThing } from "@/lib/uploadthing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import type { Event, EventFormValues, EventGalleryResource } from "./types";
 import { EVENT_ATTACHABLE_TYPE, eventSchema } from "./types";
 import {
@@ -192,12 +192,12 @@ export function EventsManagement() {
   }, [editOpen, targetEvent?.id, loadEditGallery]);
 
   const createForm = useForm<EventFormValues>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(eventSchema) as unknown as Resolver<EventFormValues>,
     defaultValues: defaultEventValues,
   });
 
   const editForm = useForm<EventFormValues>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(eventSchema) as unknown as Resolver<EventFormValues>,
     defaultValues: defaultEventValues,
   });
 

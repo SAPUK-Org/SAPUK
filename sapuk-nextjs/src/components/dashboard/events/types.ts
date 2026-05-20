@@ -126,23 +126,28 @@ export const eventSchema = z
       .array(z.string().min(1, "Location cannot be empty"))
       .min(1, "At least one location is required"),
     type: z.string().optional(),
-    max_volunteers: z.preprocess(
-      (val) =>
-        val === "" || val === undefined || val === null || Number.isNaN(val)
-          ? undefined
-          : val,
-      z
-        .number()
-        .int("Max volunteers must be a whole number")
-        .min(1, "Max volunteers must be at least 1")
-        .optional(),
-    ),
+    max_volunteers: z
+      .number()
+      .int("Max volunteers must be a whole number")
+      .min(1, "Max volunteers must be at least 1")
+      .optional(),
     /** When true, event appears on the public projects page. */
     is_active: z.boolean(),
     external_links: z.array(eventExternalLinkFormSchema),
     studio_partners: z.array(eventStudioPartnerFormSchema),
   })
   .superRefine((data, ctx) => {
+    if (
+      data.max_volunteers !== undefined &&
+      (typeof data.max_volunteers !== "number" || Number.isNaN(data.max_volunteers))
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Max volunteers must be a whole number",
+        path: ["max_volunteers"],
+      });
+    }
+
     data.external_links.forEach((link, i) => {
       const label = link.label.trim();
       const url = link.url.trim();
@@ -278,4 +283,4 @@ export const eventSchema = z
     }
   });
 
-export type EventFormValues = z.infer<typeof eventSchema>;
+export type EventFormValues = z.output<typeof eventSchema>;

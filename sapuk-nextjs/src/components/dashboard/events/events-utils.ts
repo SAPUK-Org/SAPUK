@@ -220,8 +220,9 @@ export function toEventApiBody(values: EventFormValues) {
     const ends_at = toEventIsoTimestamp(values.ends_at);
     return {
       ...base,
+      schedule_mode: "single",
       dates_description: null,
-      schedule_slots: [] as { starts_at: string; ends_at: string }[],
+      schedule_slots: [],
       starts_at,
       ends_at,
     };
@@ -230,22 +231,25 @@ export function toEventApiBody(values: EventFormValues) {
   if (scheduleMode === "multiple") {
     return {
       ...base,
+      schedule_mode: "multiple",
       dates_description: null,
-      starts_at: null,
-      ends_at: null,
-      schedule_slots: values.schedule_slots.map((slot) => ({
-        starts_at: toEventIsoTimestamp(slot.starts_at),
-        ends_at: toEventIsoTimestamp(slot.ends_at),
-      })),
+      schedule_slots: values.schedule_slots
+        .map((slot) => ({
+          starts_at: toEventIsoTimestamp(slot.starts_at),
+          ends_at: toEventIsoTimestamp(slot.ends_at),
+        }))
+        .filter(
+          (slot): slot is { starts_at: string; ends_at: string } =>
+            slot.starts_at != null && slot.ends_at != null,
+        ),
     };
   }
 
   return {
     ...base,
+    schedule_mode: "prose",
     dates_description: (values.dates_description ?? "").trim() || null,
-    schedule_slots: [] as { starts_at: string; ends_at: string }[],
-    starts_at: null,
-    ends_at: null,
+    schedule_slots: [],
   };
 }
 

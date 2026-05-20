@@ -103,12 +103,42 @@ export type ResolvedEventSchedule =
       dates_description: string;
     };
 
+export type EventScheduleModeInput = "single" | "multiple" | "prose";
+
+function normalizeScheduleMode(raw: unknown): EventScheduleModeInput | null {
+  if (raw === "single" || raw === "multiple" || raw === "prose") {
+    return raw;
+  }
+  return null;
+}
+
 export function resolveEventSchedule(input: {
+  schedule_mode?: unknown;
   starts_at: unknown;
   ends_at: unknown;
   schedule_slots: unknown;
   dates_description: unknown;
 }): ResolvedEventSchedule | { ok: false; msg: string } {
+  const explicitMode = normalizeScheduleMode(input.schedule_mode);
+
+  if (explicitMode === "prose") {
+    const datesDesc = normalizeDatesDescription(input.dates_description);
+    if (!datesDesc) {
+      return {
+        ok: false,
+        msg: "Dates description is required for recurring or TBC schedules",
+      };
+    }
+    return {
+      ok: true,
+      mode: "prose",
+      starts_at: null,
+      ends_at: null,
+      schedule_slots: [],
+      dates_description: datesDesc,
+    };
+  }
+
   const parsedStart = parseOptionalTimestamp(input.starts_at, "starts_at");
   if (!parsedStart.ok) {
     return parsedStart;
@@ -122,6 +152,43 @@ export function resolveEventSchedule(input: {
     return parsedSlots;
   }
   const datesDesc = normalizeDatesDescription(input.dates_description);
+
+  if (explicitMode === "single") {
+    if (parsedStart.value === null || parsedEnd.value === null) {
+      return {
+        ok: false,
+        msg: "Start and end date/time are required for a single session",
+      };
+    }
+    if (parsedEnd.value.getTime() < parsedStart.value.getTime()) {
+      return { ok: false, msg: "ends_at must be on or after starts_at" };
+    }
+    return {
+      ok: true,
+      mode: "single",
+      starts_at: parsedStart.value,
+      ends_at: parsedEnd.value,
+      schedule_slots: [],
+      dates_description: null,
+    };
+  }
+
+  if (explicitMode === "multiple") {
+    if (parsedSlots.value.length === 0) {
+      return {
+        ok: false,
+        msg: "Add at least one session in schedule_slots",
+      };
+    }
+    return {
+      ok: true,
+      mode: "multiple",
+      starts_at: null,
+      ends_at: null,
+      schedule_slots: parsedSlots.value,
+      dates_description: null,
+    };
+  }
 
   const hasSingle = parsedStart.value !== null && parsedEnd.value !== null;
   const hasSinglePartial =

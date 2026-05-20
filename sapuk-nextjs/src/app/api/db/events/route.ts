@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_API_URL =
-  process.env.BACKEND_API_URL || "http://localhost:9090/api";
+import { getBackendApiUrl } from "@/lib/backend-api-url";
+
+const BACKEND_API_URL = getBackendApiUrl();
 
 function getAuthHeader(req: Request): string | null {
   return req.headers.get("authorization");
@@ -24,9 +25,18 @@ export async function GET(req: Request) {
 
     const data = await res.json().catch(() => null);
     if (!res.ok) {
-      return NextResponse.json(data ?? { msg: "Events request failed" }, {
-        status: res.status,
-      });
+      console.error(
+        "[api/db/events GET] backend",
+        res.status,
+        `${BACKEND_API_URL}/dashboard/events`,
+        data ?? "(no JSON body)",
+      );
+      return NextResponse.json(
+        data && typeof data === "object" && "msg" in data
+          ? data
+          : { msg: "Events request failed" },
+        { status: res.status },
+      );
     }
     return NextResponse.json(data);
   } catch (err) {

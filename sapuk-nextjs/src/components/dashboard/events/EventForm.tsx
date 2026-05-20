@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import {
   Form,
@@ -197,7 +197,7 @@ function StudioPartnerCard({
                   control={form.control}
                   name={`studio_partners.${nestIndex}.socialLinks.${si}.url`}
                   render={({ field }) => (
-                    <FormItem className="min-w-0 flex-[2]">
+                    <FormItem className="min-w-0 flex-2">
                       <FormLabel className="text-xs">URL</FormLabel>
                       <FormControl>
                         <Input placeholder="https://…" {...field} />
@@ -296,9 +296,17 @@ export function EventForm({
     starts_at: (scheduleModeWatch[2] as string | undefined) ?? "",
     ends_at: (scheduleModeWatch[3] as string | undefined) ?? "",
     schedule_slots:
-      (scheduleModeWatch[4] as { starts_at: string; ends_at: string }[] | undefined) ??
-      [],
+      (scheduleModeWatch[4] as
+        | { starts_at: string; ends_at: string }[]
+        | undefined) ?? [],
   });
+
+  useEffect(() => {
+    const fieldMode = form.getValues("schedule_mode");
+    if (scheduleMode !== fieldMode) {
+      form.setValue("schedule_mode", scheduleMode, { shouldValidate: false });
+    }
+  }, [scheduleMode, form]);
 
   const applyScheduleMode = (mode: EventScheduleMode) => {
     form.setValue("schedule_mode", mode, { shouldValidate: true });
@@ -694,7 +702,7 @@ export function EventForm({
                     control={form.control}
                     name={`external_links.${i}.url`}
                     render={({ field }) => (
-                      <FormItem className="min-w-0 flex-[2]">
+                      <FormItem className="min-w-0 flex-2">
                         <FormLabel className="text-xs">URL</FormLabel>
                         <FormControl>
                           <Input placeholder="https://…" {...field} />
@@ -798,7 +806,7 @@ export function EventForm({
               <FormItem>
                 <FormControl>
                   <RadioGroup
-                    value={field.value}
+                    value={scheduleMode}
                     onValueChange={(v) => {
                       const mode = v as EventScheduleMode;
                       field.onChange(mode);
@@ -814,10 +822,7 @@ export function EventForm({
                       </Label>
                     </div>
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem
-                        value="multiple"
-                        id="schedule-multiple"
-                      />
+                      <RadioGroupItem value="multiple" id="schedule-multiple" />
                       <Label
                         htmlFor="schedule-multiple"
                         className="font-normal"
@@ -977,9 +982,7 @@ export function EventForm({
               variant="outline"
               size="sm"
               disabled={actionLoading}
-              onClick={() =>
-                form.setValue("location", [...locationFields, ""])
-              }
+              onClick={() => form.setValue("location", [...locationFields, ""])}
             >
               Add location
             </Button>
@@ -1006,10 +1009,7 @@ export function EventForm({
                           Location {i + 1}
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="e.g. Leggers Inn"
-                            {...field}
-                          />
+                          <Input placeholder="e.g. Leggers Inn" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

@@ -341,6 +341,36 @@ describe("Events API Endpoints", () => {
         "June 2026 and July 2026 — exact days TBC",
       );
     });
+    test("Should return 201 with frontend-shaped recurring/TBC payload (schedule_mode prose)", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const { body } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Dewsbury Safe Space",
+          description: "Weekly safe space alternating venues.",
+          cover_image: null,
+          schedule_mode: "prose",
+          dates_description: "Alternates Saturdays — check website for dates",
+          location: ["Leggers Inn", "Dewsbury Moor Children's Centre"],
+          type: null,
+          max_volunteers: null,
+          is_active: true,
+          external_links: [],
+          studio_partners: [],
+        })
+        .expect(201);
+      expect(body.event.starts_at).toBeNull();
+      expect(body.event.ends_at).toBeNull();
+      expect(body.event.schedule_slots).toEqual([]);
+      expect(body.event.dates_description).toBe(
+        "Alternates Saturdays — check website for dates",
+      );
+    });
     test("Should return 201 when schedule_slots are provided without top-level timestamps", async () => {
       const loginRes = await request(app)
         .post("/api/auth/login")

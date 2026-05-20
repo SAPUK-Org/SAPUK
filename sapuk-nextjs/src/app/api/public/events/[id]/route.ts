@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND_API_URL =
-  process.env.BACKEND_API_URL || "http://localhost:9090/api";
+import { getBackendApiUrl } from "@/lib/backend-api-url";
+
+const BACKEND_API_URL = getBackendApiUrl();
 
 const noStore = { "Cache-Control": "no-store, max-age=0" } as const;
 

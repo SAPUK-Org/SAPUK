@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_API_URL =
-  process.env.BACKEND_API_URL || "http://localhost:9090/api";
+import { getBackendApiUrl } from "@/lib/backend-api-url";
+
+const BACKEND_API_URL = getBackendApiUrl();
 
 export async function PATCH(
   req: Request,

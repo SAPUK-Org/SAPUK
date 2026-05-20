@@ -129,9 +129,13 @@ export function EventsManagement() {
         },
       );
       if (!ok) {
-        const msg =
+        const rawMsg =
           (data as { msg?: string })?.msg ?? "Failed to create event";
-        console.error("[create event] API error:", data);
+        const msg =
+          rawMsg === "Starts at is required"
+            ? "The live API server has not been updated yet and still requires fixed start/end times. Redeploy the backend on Render with the latest code, or run locally with BACKEND_API_URL=http://localhost:9090/api in .env.local."
+            : rawMsg;
+        console.error("[create event] API error:", data, "payload:", body);
         setActionError(msg);
         return;
       }

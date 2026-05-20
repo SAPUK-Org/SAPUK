@@ -93,6 +93,7 @@ export const createEvent = async (
       title,
       description,
       cover_image,
+      schedule_mode,
       dates_description,
       schedule_slots,
       starts_at,
@@ -147,6 +148,7 @@ export const createEvent = async (
     }
 
     const schedule = resolveEventSchedule({
+      schedule_mode,
       starts_at,
       ends_at,
       schedule_slots,
@@ -218,6 +220,7 @@ export const updateEvent = async (
     title,
     description,
     cover_image,
+    schedule_mode,
     dates_description,
     schedule_slots,
     starts_at,
@@ -299,7 +302,15 @@ export const updateEvent = async (
       ? dates_description
       : event.dates_description;
 
+    const scheduleModeRaw = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "schedule_mode",
+    )
+      ? schedule_mode
+      : undefined;
+
     const schedule = resolveEventSchedule({
+      schedule_mode: scheduleModeRaw,
       starts_at: startRaw,
       ends_at: endRaw,
       schedule_slots: slotsRaw,

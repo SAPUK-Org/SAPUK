@@ -1,6 +1,7 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { z } from "zod";
+import { getBackendApiUrl } from "@/lib/backend-api-url";
 
 /** Client sends `{}` for the library or both fields for an attachable (e.g. event). */
 const resourceUploaderInputSchema = z
@@ -22,8 +23,7 @@ const resourceUploaderInputSchema = z
 
 const f = createUploadthing();
 
-const BACKEND_API_URL =
-  process.env.BACKEND_API_URL || "http://localhost:9090/api";
+const BACKEND_API_URL = getBackendApiUrl();
 const UPLOAD_CALLBACK_SECRET = process.env.UPLOAD_CALLBACK_SECRET;
 
 const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function

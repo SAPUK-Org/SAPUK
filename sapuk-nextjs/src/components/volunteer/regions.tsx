@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function RegionsSection() {
   return (
     <>
@@ -7,7 +9,14 @@ export default function RegionsSection() {
       <ul className="list-disc list-inside text-zinc-800 space-y-1.5 flex flex-wrap gap-2 pr-4">
         <li>Blackburn</li>
         <li>Stafford</li>
-        <li>Dewsbury</li>
+        <li>
+          <Link
+            href="/how-we-can-help-you/local/dewsbury"
+            className="text-link hover:underline"
+          >
+            Dewsbury
+          </Link>
+        </li>
         <li>Somerset</li>
         <li>Gwynedd</li>
         <li>Rommey Marsh</li>

@@ -15,14 +15,14 @@ export default function Hero() {
             centres, schools, universities, work spaces, colleges, etc. We offer
             our services in a number of ways –
             <Link
-              href="/projects/foodpantry"
+              href="/how-we-can-help-you/local/dewsbury#food-pantries"
               className="font-medium text-link hover:text-link/80 transition-colors duration-200 ease-in-out mx-1"
             >
               Food Pantries
             </Link>
             /
             <Link
-              href="/projects/safe-spaces"
+              href="/how-we-can-help-you/local/dewsbury#safe-spaces"
               className="font-medium text-link hover:text-link/80 transition-colors duration-200 ease-in-out mx-1"
             >
               SAFE SPACE

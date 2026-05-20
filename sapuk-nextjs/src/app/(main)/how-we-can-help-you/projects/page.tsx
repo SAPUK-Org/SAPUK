@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Event } from "@/components/dashboard/events/types";
 import { eventEarliestStart } from "@/components/dashboard/events/events-utils";
+import LocalServicesBanner from "@/components/how-we-can-help-you/local/LocalServicesBanner";
 import ProjectEventsList from "@/components/projects/ProjectEventsList";
 
 function sortEventsByStart(list: Event[]) {
@@ -59,6 +60,7 @@ export default function ProjectsPage() {
   return (
     <section className="px-4 py-12 md:py-16">
       <div className="container mx-auto max-w-3xl">
+        <LocalServicesBanner />
         {eventsLoading ? (
           <p className="text-sm text-zinc-400">Loading events…</p>
         ) : null}

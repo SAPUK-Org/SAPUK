@@ -19,6 +19,7 @@ export const dropdownItems: DropdownItem[] = [
     label: "HOW WE CAN HELP YOU",
     menuItems: [
       { href: "/how-we-can-help-you/projects", text: "Projects" },
+      { href: "/how-we-can-help-you/local", text: "Local Services" },
       { href: "/how-we-can-help-you/community", text: "Blogs/Community" },
       {
         href: "/how-we-can-help-you/downloadable-media",

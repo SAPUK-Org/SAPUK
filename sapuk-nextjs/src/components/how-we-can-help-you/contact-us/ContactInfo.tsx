@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function ContactInfo() {
   return (
@@ -19,6 +20,25 @@ export default function ContactInfo() {
           <div>
             <p className="font-semibold">General inquiries -</p>
             <p>admin@suicideapuk.co.uk</p>
+          </div>
+          <div>
+            <p className="font-semibold">Dewsbury (Kirklees) -</p>
+            <p>
+              Events and local programmes:{" "}
+              <Link
+                href="/how-we-can-help-you/local/dewsbury"
+                className="text-link font-medium hover:underline"
+              >
+                view local services
+              </Link>
+              {" · "}
+              <a
+                href="mailto:dewsburyoffice@suicideapuk.co.uk"
+                className="text-link font-medium hover:underline"
+              >
+                dewsburyoffice@suicideapuk.co.uk
+              </a>
+            </p>
           </div>
         </div>
       </div>

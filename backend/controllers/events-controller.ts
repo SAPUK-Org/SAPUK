@@ -13,6 +13,11 @@ import { UTApi } from "uploadthing/server";
 import type { Event } from "../types";
 import { logAudit } from "../utils/logAudit";
 import { parseExternalLinks, parseStudioPartners } from "../utils/parseEventMedia";
+import { parseLocations } from "../utils/parseLocations";
+import {
+  parseOptionalEventType,
+  parseOptionalMaxVolunteers,
+} from "../utils/parseEventFields";
 import { resolveEventSchedule } from "../utils/eventDates";
 
 export const getEvents = async (
@@ -104,14 +109,14 @@ export const createEvent = async (
     if (!description) {
       return res.status(400).send({ msg: "Description is required" });
     }
-    if (!location) {
-      return res.status(400).send({ msg: "Location is required" });
+    const parsedLocations = parseLocations(location);
+    if (!parsedLocations.ok) {
+      return res.status(400).send({ msg: parsedLocations.msg });
     }
-    if (!type) {
-      return res.status(400).send({ msg: "Type is required" });
-    }
-    if (max_volunteers === undefined || max_volunteers === null) {
-      return res.status(400).send({ msg: "Max volunteers is required" });
+    const parsedType = parseOptionalEventType(type);
+    const parsedMaxVolunteers = parseOptionalMaxVolunteers(max_volunteers);
+    if (!parsedMaxVolunteers.ok) {
+      return res.status(400).send({ msg: parsedMaxVolunteers.msg });
     }
     const cover =
       typeof cover_image === "string" && cover_image.trim() === ""
@@ -148,9 +153,9 @@ export const createEvent = async (
       schedule.schedule_slots,
       schedule.starts_at,
       schedule.ends_at,
-      location,
-      type,
-      max_volunteers,
+      parsedLocations.value,
+      parsedType,
+      parsedMaxVolunteers.value,
       active,
       parsedLinks.value,
       parsedStudios.value,
@@ -229,14 +234,14 @@ export const updateEvent = async (
     if (!description) {
       return res.status(400).send({ msg: "Description is required" });
     }
-    if (!location) {
-      return res.status(400).send({ msg: "Location is required" });
+    const parsedLocations = parseLocations(location);
+    if (!parsedLocations.ok) {
+      return res.status(400).send({ msg: parsedLocations.msg });
     }
-    if (!type) {
-      return res.status(400).send({ msg: "Type is required" });
-    }
-    if (max_volunteers === undefined || max_volunteers === null) {
-      return res.status(400).send({ msg: "Max volunteers is required" });
+    const parsedType = parseOptionalEventType(type);
+    const parsedMaxVolunteers = parseOptionalMaxVolunteers(max_volunteers);
+    if (!parsedMaxVolunteers.ok) {
+      return res.status(400).send({ msg: parsedMaxVolunteers.msg });
     }
     const active =
       typeof is_active === "boolean" ? is_active : (event.is_active ?? true);
@@ -303,9 +308,9 @@ export const updateEvent = async (
       schedule.schedule_slots,
       schedule.starts_at,
       schedule.ends_at,
-      location,
-      type,
-      max_volunteers,
+      parsedLocations.value,
+      parsedType,
+      parsedMaxVolunteers.value,
       active,
       parsedLinks.value,
       parsedStudios.value,

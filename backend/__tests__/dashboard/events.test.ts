@@ -34,9 +34,7 @@ describe("Events API Endpoints", () => {
         expect(event.ends_at === null || typeof event.ends_at === "string").toBe(
           true,
         );
-        expect(event.location).toBeDefined();
-        expect(event.type).toBeDefined();
-        expect(event.max_volunteers).toBeDefined();
+        expect(Array.isArray(event.location)).toBe(true);
         expect(event.created_by).toBeDefined();
         expect(event.created_at).toBeDefined();
         expect(event.updated_at).toBeDefined();
@@ -60,7 +58,7 @@ describe("Events API Endpoints", () => {
           description: "Test Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -69,10 +67,145 @@ describe("Events API Endpoints", () => {
       expect(body.event.description).toBe("Test Description");
       expect(body.event.starts_at).toEqual(expect.any(String));
       expect(body.event.ends_at).toEqual(expect.any(String));
-      expect(body.event.location).toBe("Test Location");
+      expect(body.event.location).toEqual(["Test Location"]);
       expect(body.event.type).toBe("Test Type");
       expect(body.event.max_volunteers).toBe(10);
       expect(body.event.created_by).toBe(1);
+    });
+    test("Should return 201 when type and max_volunteers are omitted", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const { body } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Open event",
+          description: "No type or volunteer cap",
+          starts_at: new Date(),
+          ends_at: new Date(),
+          location: ["Community Hall"],
+        })
+        .expect(201);
+      expect(body.event.type).toBeNull();
+      expect(body.event.max_volunteers).toBeNull();
+    });
+    test("Should return 400 when max_volunteers is invalid", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Test Event",
+          description: "Test Description",
+          starts_at: new Date(),
+          ends_at: new Date(),
+          location: ["Test Location"],
+          max_volunteers: 0,
+        })
+        .expect(400);
+      expect(msg).toBe(
+        "max_volunteers must be a positive integer when provided",
+      );
+    });
+    test("Should return 201 with multiple locations", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const { body } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Multi-venue Event",
+          description: "Test Description",
+          starts_at: new Date(),
+          ends_at: new Date(),
+          location: ["Leggers Inn", "Dewsbury Moor Children's Centre"],
+          type: "Test Type",
+          max_volunteers: 10,
+        })
+        .expect(201);
+      expect(body.event.location).toEqual([
+        "Leggers Inn",
+        "Dewsbury Moor Children's Centre",
+      ]);
+    });
+    test("Should accept legacy single string location", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const { body } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Legacy location",
+          description: "Test Description",
+          starts_at: new Date(),
+          ends_at: new Date(),
+          location: "Single Venue",
+          type: "Test Type",
+          max_volunteers: 10,
+        })
+        .expect(201);
+      expect(body.event.location).toEqual(["Single Venue"]);
+    });
+    test("Should return 400 when location array is empty", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Test Event",
+          description: "Test Description",
+          starts_at: new Date(),
+          ends_at: new Date(),
+          location: [],
+          type: "Test Type",
+          max_volunteers: 10,
+        })
+        .expect(400);
+      expect(msg).toBe("At least one location is required");
+    });
+    test("Should return 400 when location is invalid type", async () => {
+      const loginRes = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "alice@example.com", password: "password" })
+        .expect(200);
+      const { token } = loginRes.body;
+      const {
+        body: { msg },
+      } = await request(app)
+        .post("/api/dashboard/events")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Test Event",
+          description: "Test Description",
+          starts_at: new Date(),
+          ends_at: new Date(),
+          location: 123,
+          type: "Test Type",
+          max_volunteers: 10,
+        })
+        .expect(400);
+      expect(msg).toBe("location must be a string or array of strings");
     });
     test("Should return 400 when request body is empty", async () => {
       const loginRes = await request(app)
@@ -104,7 +237,7 @@ describe("Events API Endpoints", () => {
           description: "Test Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -126,7 +259,7 @@ describe("Events API Endpoints", () => {
           title: "Test Event",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -149,7 +282,7 @@ describe("Events API Endpoints", () => {
           description: "Test Description",
           starts_at: new Date(),
           ends_at: null,
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -174,7 +307,7 @@ describe("Events API Endpoints", () => {
           description: "Test Description",
           starts_at: null,
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -196,7 +329,7 @@ describe("Events API Endpoints", () => {
           title: "Undated project",
           description: "Details TBC",
           dates_description: "June 2026 and July 2026 — exact days TBC",
-          location: "TBC",
+          location: ["TBC"],
           type: "Project",
           max_volunteers: 5,
         })
@@ -229,7 +362,7 @@ describe("Events API Endpoints", () => {
               ends_at: new Date("2025-08-02T15:00:00Z"),
             },
           ],
-          location: "Community Hub",
+          location: ["Community Hub"],
           type: "Workshop",
           max_volunteers: 8,
         })
@@ -264,7 +397,7 @@ describe("Events API Endpoints", () => {
               ends_at: new Date("2025-08-01T14:00:00Z"),
             },
           ],
-          location: "Hub",
+          location: ["Hub"],
           type: "Workshop",
           max_volunteers: 5,
         })
@@ -294,7 +427,7 @@ describe("Events API Endpoints", () => {
               ends_at: new Date("2025-08-01T14:00:00Z"),
             },
           ],
-          location: "Hub",
+          location: ["Hub"],
           type: "Workshop",
           max_volunteers: 5,
         })
@@ -317,7 +450,7 @@ describe("Events API Endpoints", () => {
         .send({
           title: "No schedule",
           description: "Missing dates",
-          location: "Hub",
+          location: ["Hub"],
           type: "Workshop",
           max_volunteers: 5,
         })
@@ -346,7 +479,7 @@ describe("Events API Endpoints", () => {
               ends_at: new Date("2025-08-01T10:00:00Z"),
             },
           ],
-          location: "Hub",
+          location: ["Hub"],
           type: "Workshop",
           max_volunteers: 5,
         })
@@ -372,7 +505,7 @@ describe("Events API Endpoints", () => {
           description: "Test Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -395,7 +528,7 @@ describe("Events API Endpoints", () => {
           description: "Test Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -426,9 +559,7 @@ describe("Events API Endpoints", () => {
       expect(event.ends_at === null || typeof event.ends_at === "string").toBe(
         true,
       );
-      expect(event.location).toBeDefined();
-      expect(event.type).toBeDefined();
-      expect(event.max_volunteers).toBeDefined();
+      expect(Array.isArray(event.location)).toBe(true);
       expect(event.created_by).toBeDefined();
       expect(event.created_at).toBeDefined();
       expect(event.updated_at).toBeDefined();
@@ -598,7 +729,7 @@ describe("Events API Endpoints", () => {
           schedule_slots: [],
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -608,7 +739,7 @@ describe("Events API Endpoints", () => {
       expect(event.cover_image).toBe("https://example.com/cover-image.jpg");
       expect(event.starts_at).toEqual(expect.any(String));
       expect(event.ends_at).toEqual(expect.any(String));
-      expect(event.location).toBe("Test Location");
+      expect(event.location).toEqual(["Test Location"]);
       expect(event.type).toBe("Test Type");
       expect(event.max_volunteers).toBe(10);
       expect(event.created_by).toBe(1);
@@ -629,7 +760,7 @@ describe("Events API Endpoints", () => {
           description: "Updated Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -666,7 +797,7 @@ describe("Events API Endpoints", () => {
           description: "Updated Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -688,7 +819,7 @@ describe("Events API Endpoints", () => {
           title: "Updated Event Title",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -711,7 +842,7 @@ describe("Events API Endpoints", () => {
           description: "Updated Description",
           starts_at: new Date(),
           ends_at: null,
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
           is_active: true,
@@ -737,7 +868,7 @@ describe("Events API Endpoints", () => {
           description: "Updated Description",
           starts_at: null,
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
           is_active: true,
@@ -766,7 +897,7 @@ describe("Events API Endpoints", () => {
           description: "Updated Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -789,7 +920,7 @@ describe("Events API Endpoints", () => {
           description: "Updated Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })
@@ -814,7 +945,7 @@ describe("Events API Endpoints", () => {
           description: "Updated Description",
           starts_at: new Date(),
           ends_at: new Date(),
-          location: "Test Location",
+          location: ["Test Location"],
           type: "Test Type",
           max_volunteers: 10,
         })

@@ -54,9 +54,9 @@ export type Event = {
   schedule_slots?: EventScheduleSlot[];
   starts_at?: string | null;
   ends_at?: string | null;
-  location: string;
-  type: string;
-  max_volunteers?: number;
+  location: string[];
+  type?: string | null;
+  max_volunteers?: number | null;
   /** False = hidden from public projects page. */
   is_active?: boolean;
   /** Ordered outbound links / embeds (TikTok, web, image URLs). */
@@ -122,9 +122,21 @@ export const eventSchema = z
     ends_at: z.string(),
     /** Multiple sessions (multiple mode). */
     schedule_slots: z.array(eventScheduleSlotFormSchema),
-    location: z.string().min(1, "Location is required"),
-    type: z.string().min(1, "Type is required"),
-    max_volunteers: z.number().int().min(1, "Max volunteers must be at least 1"),
+    location: z
+      .array(z.string().min(1, "Location cannot be empty"))
+      .min(1, "At least one location is required"),
+    type: z.string().optional(),
+    max_volunteers: z.preprocess(
+      (val) =>
+        val === "" || val === undefined || val === null || Number.isNaN(val)
+          ? undefined
+          : val,
+      z
+        .number()
+        .int("Max volunteers must be a whole number")
+        .min(1, "Max volunteers must be at least 1")
+        .optional(),
+    ),
     /** When true, event appears on the public projects page. */
     is_active: z.boolean(),
     external_links: z.array(eventExternalLinkFormSchema),

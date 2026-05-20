@@ -21,8 +21,7 @@ describe("Public events API", () => {
       events.forEach((event: Event & { gallery?: unknown }) => {
         expect(event.title).toBeDefined();
         expect(event.description).toBeDefined();
-        expect(event.location).toBeDefined();
-        expect(event.type).toBeDefined();
+        expect(Array.isArray(event.location)).toBe(true);
         expect(event.is_active).not.toBe(false);
         expect(Array.isArray(event.gallery)).toBe(true);
         expect(Array.isArray(event.external_links)).toBe(true);

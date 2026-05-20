@@ -14,6 +14,7 @@ import {
   defaultEventValues,
   eventEarliestStart,
   inferScheduleMode,
+  normalizeEventLocations,
   toDatetimeLocal,
 } from "./events-utils";
 import { EventCard } from "./EventCard";
@@ -53,11 +54,21 @@ function toEventApiBody(values: EventFormValues) {
         })),
     }));
 
-  const { schedule_mode, ...rest } = values;
+  const location = values.location.map((l) => l.trim()).filter(Boolean);
+  const type = (values.type ?? "").trim() || null;
+  const max_volunteers =
+    values.max_volunteers != null && !Number.isNaN(values.max_volunteers)
+      ? values.max_volunteers
+      : null;
+
+  const { schedule_mode, location: _locations, type: _type, max_volunteers: _max, ...rest } = values;
 
   if (schedule_mode === "single") {
     return {
       ...rest,
+      location,
+      type,
+      max_volunteers,
       external_links,
       studio_partners,
       dates_description: null,
@@ -70,6 +81,9 @@ function toEventApiBody(values: EventFormValues) {
   if (schedule_mode === "multiple") {
     return {
       ...rest,
+      location,
+      type,
+      max_volunteers,
       external_links,
       studio_partners,
       dates_description: null,
@@ -84,6 +98,9 @@ function toEventApiBody(values: EventFormValues) {
 
   return {
     ...rest,
+    location,
+    type,
+    max_volunteers,
     external_links,
     studio_partners,
     dates_description: (values.dates_description ?? "").trim() || null,
@@ -362,9 +379,12 @@ export function EventsManagement() {
               ends_at: toDatetimeLocal(slot.ends_at),
             }))
           : [],
-      location: event.location,
-      type: event.type,
-      max_volunteers: event.max_volunteers ?? 1,
+      location: (() => {
+        const locs = normalizeEventLocations(event.location);
+        return locs.length > 0 ? locs : [""];
+      })(),
+      type: event.type ?? "",
+      max_volunteers: event.max_volunteers ?? undefined,
       is_active: event.is_active !== false,
       external_links: Array.isArray(event.external_links)
         ? event.external_links.map((l) => ({

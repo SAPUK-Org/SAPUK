@@ -279,6 +279,8 @@ export function EventForm({
     name: "schedule_slots",
   });
 
+  const locationFields = form.watch("location") ?? [""];
+
   const scheduleMode = form.watch("schedule_mode");
 
   const applyScheduleMode = (mode: EventScheduleMode) => {
@@ -948,26 +950,79 @@ export function EventForm({
             />
           ) : null}
         </div>
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input placeholder="Event location" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+        <div className="space-y-3 rounded-lg border border-zinc-300/80 bg-zinc-100/50 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <FormLabel className="text-base">Locations</FormLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={actionLoading}
+              onClick={() =>
+                form.setValue("location", [...locationFields, ""])
+              }
+            >
+              Add location
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Add each venue separately (e.g. when an event alternates between two
+            places).
+          </p>
+          {locationFields.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No locations yet.</p>
+          ) : (
+            <ul className="space-y-2">
+              {locationFields.map((_, i) => (
+                <li
+                  key={i}
+                  className="flex flex-col gap-2 rounded-md border border-zinc-200 bg-background p-3 sm:flex-row sm:items-center"
+                >
+                  <FormField
+                    control={form.control}
+                    name={`location.${i}`}
+                    render={({ field }) => (
+                      <FormItem className="min-w-0 flex-1">
+                        <FormLabel className="text-xs">
+                          Location {i + 1}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. Leggers Inn"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 sm:self-end"
+                    disabled={actionLoading || locationFields.length <= 1}
+                    onClick={() =>
+                      form.setValue(
+                        "location",
+                        locationFields.filter((_, idx) => idx !== i),
+                      )
+                    }
+                  >
+                    Remove
+                  </Button>
+                </li>
+              ))}
+            </ul>
           )}
-        />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Type</FormLabel>
+                <FormLabel>Type (optional)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g. Pantry, Walk, Coffee morning"
@@ -983,15 +1038,19 @@ export function EventForm({
             name="max_volunteers"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Max volunteers</FormLabel>
+                <FormLabel>Max volunteers (optional)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     min={1}
+                    placeholder="Leave blank if not applicable"
                     value={field.value ?? ""}
-                    onChange={(e) =>
-                      field.onChange(e.target.valueAsNumber || 1)
-                    }
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      field.onChange(
+                        raw === "" ? undefined : e.target.valueAsNumber,
+                      );
+                    }}
                     onBlur={field.onBlur}
                   />
                 </FormControl>

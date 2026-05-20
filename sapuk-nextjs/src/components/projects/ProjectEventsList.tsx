@@ -8,6 +8,7 @@ import type {
 } from "@/components/dashboard/events/types";
 import {
   formatEventDateTime,
+  formatEventLocations,
   unifiedEventGalleryImages,
 } from "@/components/dashboard/events/events-utils";
 import { EventProjectMedia } from "@/components/projects/embeds/EventProjectMedia";
@@ -145,7 +146,7 @@ export default function ProjectEventsList({
                             {formatEventDateTime(event)}
                           </p>
                           <p className="text-sm text-primary md:text-base">
-                            {event.location}
+                            {formatEventLocations(event.location)}
                             {event.max_volunteers != null
                               ? ` · Max ${event.max_volunteers} volunteers`
                               : null}
@@ -172,7 +173,7 @@ export default function ProjectEventsList({
                           {formatEventDateTime(event)}
                         </p>
                         <p className="text-sm text-primary md:text-base">
-                          {event.location}
+                          {formatEventLocations(event.location)}
                           {event.max_volunteers != null
                             ? ` · Max ${event.max_volunteers} volunteers`
                             : null}

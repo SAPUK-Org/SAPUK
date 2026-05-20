@@ -127,6 +127,27 @@ export function unifiedEventGalleryImages(event: Event): EventGalleryImage[] {
   return [...base, ...fromLinks];
 }
 
+/** Normalize API location (array or legacy string) to string[]. */
+export function normalizeEventLocations(
+  locations: string[] | string | null | undefined,
+): string[] {
+  if (Array.isArray(locations)) {
+    return locations.map((l) => String(l).trim()).filter(Boolean);
+  }
+  if (typeof locations === "string" && locations.trim()) {
+    return [locations.trim()];
+  }
+  return [];
+}
+
+export function formatEventLocations(
+  locations: string[] | string | null | undefined,
+): string {
+  const list = normalizeEventLocations(locations);
+  if (list.length === 0) return "Location TBC";
+  return list.join(" · ");
+}
+
 export const defaultEventValues: EventFormValues = {
   title: "",
   description: "",
@@ -136,9 +157,9 @@ export const defaultEventValues: EventFormValues = {
   starts_at: "",
   ends_at: "",
   schedule_slots: [],
-  location: "",
+  location: [""],
   type: "",
-  max_volunteers: 1,
+  max_volunteers: undefined,
   is_active: true,
   external_links: [],
   studio_partners: [],

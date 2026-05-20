@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Loader2, Pencil, Trash2 } from "lucide-react";
 import type { Event } from "./types";
-import { formatEventDateTime, unifiedEventGalleryImages } from "./events-utils";
+import {
+  formatEventDateTime,
+  formatEventLocations,
+  unifiedEventGalleryImages,
+} from "./events-utils";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
 import { useRef, useState } from "react";
@@ -113,10 +117,11 @@ export function EventCard({
         <div className="flex flex-col gap-2 pt-2">
           <Label>{formatEventDateTime(event)}</Label>
           <p className="text-sm text-muted-foreground">
-            {event.location} • {event.type}
+            {formatEventLocations(event.location)}
+            {event.type ? ` • ${event.type}` : ""}
             {event.max_volunteers != null
               ? ` • Max ${event.max_volunteers} volunteers`
-              : " • Volunteers: TBC"}
+              : ""}
           </p>
         </div>
       </CardHeader>

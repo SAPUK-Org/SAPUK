@@ -9,7 +9,7 @@ export const events: Event[] = [
       "A gentle, welcoming space for people who feel isolated. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
     cover_image:
       "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwq4G2Nv5N5weoZT7nX0E83VGLBvSPJhs94i6C",
-    location: "Multiple Locations",
+    location: ["Multiple Locations"],
     type: "Community Event",
     created_by: 1,
     is_active: true,
@@ -26,7 +26,7 @@ export const events: Event[] = [
     max_volunteers: 15,
     description:
       "A safe space for people who are struggling with suicidal thoughts or feelings. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
-    location: "Multiple Locations",
+    location: ["Multiple Locations"],
     type: "Community Event",
     created_by: 2,
     is_active: true,
@@ -45,7 +45,7 @@ export const events: Event[] = [
       "A festival for people who are struggling with suicidal thoughts or feelings. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
     cover_image:
       "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwSgkNq3nszR8M3u9m7kNZCaorFDgqybHf6VvY",
-    location: "Multiple Locations",
+    location: ["Multiple Locations"],
     type: "Community Event",
     created_by: 1,
     is_active: true,
@@ -63,7 +63,7 @@ export const events: Event[] = [
     description:
       "A project for people who are struggling with suicidal thoughts or feelings. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
     cover_image: null,
-    location: "Multiple Locations",
+    location: ["Multiple Locations"],
     type: "Community Event",
     created_by: 1,
     is_active: true,
@@ -82,7 +82,7 @@ export const events: Event[] = [
       "A seminar for people who are struggling with suicidal thoughts or feelings. This is a 12 month project that brings community events to the community. Each event differs. Either the last Saturday / Sunday of every month. The aim of this project is to get people who are struggling to get into the community, into the community. We can do this by getting to know one another here and, if necessary, local services or businesses at a specific event or venue. For some events we are looking for 10-20 local businesses to join us in this unique community movement.",
     cover_image:
       "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwgQYJlA0dbDFNzJK5pSw7XZsCkn2Bah8OlqQx",
-    location: "Longridge, Preston",
+    location: ["Longridge, Preston"],
     type: "Seminar",
     created_by: 1,
     is_active: false,
@@ -95,7 +95,7 @@ export const events: Event[] = [
     id: 6,
     title: "Weekend Open Days",
     description: "Two-day open house with staggered sessions.",
-    location: "Community Hub",
+    location: ["Community Hub"],
     type: "Community Event",
     schedule_slots: [
       {

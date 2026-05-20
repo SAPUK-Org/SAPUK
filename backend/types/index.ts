@@ -45,9 +45,9 @@ export type Event = {
   schedule_slots?: EventScheduleSlot[];
   starts_at?: Date | null;
   ends_at?: Date | null;
-  location: string;
-  type: string;
-  max_volunteers?: number;
+  location: string[];
+  type?: string | null;
+  max_volunteers?: number | null;
   /** When false, event is hidden from public projects page. */
   is_active: boolean;
   external_links?: EventExternalLink[] | null;

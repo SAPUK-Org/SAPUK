@@ -276,7 +276,7 @@
             "description": "Event description",
             "starts_at": "2025-01-01T00:00:00.000Z",
             "ends_at": "2025-01-02T00:00:00.000Z",
-            "location": "London",
+            "location": ["London"],
             "type": "volunteering",
             "max_volunteers": 10,
             "created_at": "",
@@ -303,9 +303,9 @@
         "ends_at": "string (ISO date, single-range mode)",
         "schedule_slots": "array of { starts_at, ends_at } ISO pairs (multi-slot mode)",
         "dates_description": "string (prose/recurring mode)",
-        "location": "string",
-        "type": "string",
-        "max_volunteers": "number"
+        "location": ["string"],
+        "type": "string (optional)",
+        "max_volunteers": "number (optional)"
       },
       "exampleResponse": {
         "event": {
@@ -314,7 +314,7 @@
           "description": "Event description",
           "starts_at": "2025-01-01T00:00:00.000Z",
           "ends_at": "2025-01-02T00:00:00.000Z",
-          "location": "London",
+          "location": ["London"],
           "type": "volunteering",
           "max_volunteers": 10,
           "created_at": "",
@@ -348,7 +348,7 @@
           "description": "Event description",
           "starts_at": "2025-01-01T00:00:00.000Z",
           "ends_at": "2025-01-02T00:00:00.000Z",
-          "location": "London",
+          "location": ["London"],
           "type": "volunteering",
           "max_volunteers": 10,
           "created_at": "",
@@ -376,9 +376,9 @@
         "ends_at": "string (ISO date, single-range mode)",
         "schedule_slots": "array of { starts_at, ends_at } ISO pairs (multi-slot mode)",
         "dates_description": "string (prose/recurring mode)",
-        "location": "string",
-        "type": "string",
-        "max_volunteers": "number"
+        "location": ["string"],
+        "type": "string (optional)",
+        "max_volunteers": "number (optional)"
       },
       "exampleResponse": {
         "event": {
@@ -387,7 +387,7 @@
           "description": "Event description",
           "starts_at": "2025-01-01T00:00:00.000Z",
           "ends_at": "2025-01-02T00:00:00.000Z",
-          "location": "London",
+          "location": ["London"],
           "type": "volunteering",
           "max_volunteers": 10,
           "created_at": "",
@@ -423,7 +423,7 @@
           "description": "Event description",
           "starts_at": "2025-01-01T00:00:00.000Z",
           "ends_at": "2025-01-02T00:00:00.000Z",
-          "location": "London",
+          "location": ["London"],
           "type": "volunteering",
           "max_volunteers": 10,
           "created_at": "",

@@ -61,9 +61,17 @@ export async function POST(req: Request) {
 
     const data = await res.json().catch(() => null);
     if (!res.ok) {
-      return NextResponse.json(data ?? { msg: "Failed to create event" }, {
-        status: res.status,
-      });
+      console.error(
+        "[api/db/events POST] backend",
+        res.status,
+        data ?? "(no JSON body)",
+      );
+      return NextResponse.json(
+        data && typeof data === "object" && "msg" in data
+          ? data
+          : { msg: "Failed to create event" },
+        { status: res.status },
+      );
     }
     return NextResponse.json(data);
   } catch (err) {

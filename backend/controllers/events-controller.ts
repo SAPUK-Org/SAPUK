@@ -79,6 +79,10 @@ export const patchEventActive = async (
   }
 };
 
+const logEventValidationError = (msg: string) => {
+  console.warn("[createEvent] 400:", msg);
+};
+
 export const createEvent = async (
   req: Request,
   res: Response,
@@ -101,21 +105,26 @@ export const createEvent = async (
       studio_partners,
     } = req.body;
     if (Object.keys(req.body).length === 0) {
+      logEventValidationError("Request body cannot be empty");
       return res.status(400).send({ msg: "Request body cannot be empty" });
     }
     if (!title) {
+      logEventValidationError("Title is required");
       return res.status(400).send({ msg: "Title is required" });
     }
     if (!description) {
+      logEventValidationError("Description is required");
       return res.status(400).send({ msg: "Description is required" });
     }
     const parsedLocations = parseLocations(location);
     if (!parsedLocations.ok) {
+      logEventValidationError(parsedLocations.msg);
       return res.status(400).send({ msg: parsedLocations.msg });
     }
     const parsedType = parseOptionalEventType(type);
     const parsedMaxVolunteers = parseOptionalMaxVolunteers(max_volunteers);
     if (!parsedMaxVolunteers.ok) {
+      logEventValidationError(parsedMaxVolunteers.msg);
       return res.status(400).send({ msg: parsedMaxVolunteers.msg });
     }
     const cover =
@@ -128,10 +137,12 @@ export const createEvent = async (
 
     const parsedLinks = parseExternalLinks(external_links);
     if (!parsedLinks.ok) {
+      logEventValidationError(parsedLinks.msg);
       return res.status(400).send({ msg: parsedLinks.msg });
     }
     const parsedStudios = parseStudioPartners(studio_partners);
     if (!parsedStudios.ok) {
+      logEventValidationError(parsedStudios.msg);
       return res.status(400).send({ msg: parsedStudios.msg });
     }
 
@@ -142,6 +153,7 @@ export const createEvent = async (
       dates_description,
     });
     if (!schedule.ok) {
+      logEventValidationError(schedule.msg);
       return res.status(400).send({ msg: schedule.msg });
     }
 

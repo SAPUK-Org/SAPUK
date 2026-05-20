@@ -16,99 +16,11 @@ import {
   inferScheduleMode,
   normalizeEventLocations,
   toDatetimeLocal,
+  toEventApiBody,
 } from "./events-utils";
 import { EventCard } from "./EventCard";
 import { EventFormDialog } from "./EventFormDialog";
 import { DeleteEventDialog } from "./DeleteEventDialog";
-
-function toEventApiBody(values: EventFormValues) {
-  const external_links = values.external_links
-    .filter((l) => l.label.trim() && l.url.trim())
-    .map((l) => ({
-      label: l.label.trim(),
-      url: l.url.trim(),
-      kind: l.kind,
-    }));
-
-  const studio_partners = values.studio_partners
-    .filter((p) => {
-      const name = p.name.trim();
-      const loc = (p.location ?? "").trim();
-      const img = (p.imageSrc ?? "").trim();
-      const desc = (p.description ?? "").trim();
-      const hasSocial = (p.socialLinks ?? []).some(
-        (s) => s.network.trim() && s.url.trim(),
-      );
-      return name || loc || img || desc || hasSocial;
-    })
-    .map((p) => ({
-      name: p.name.trim(),
-      location: (p.location ?? "").trim() || null,
-      imageSrc: (p.imageSrc ?? "").trim() || null,
-      description: (p.description ?? "").trim() || null,
-      socialLinks: (p.socialLinks ?? [])
-        .filter((s) => s.network.trim() && s.url.trim())
-        .map((s) => ({
-          network: s.network.trim(),
-          url: s.url.trim(),
-        })),
-    }));
-
-  const location = values.location.map((l) => l.trim()).filter(Boolean);
-  const type = (values.type ?? "").trim() || null;
-  const max_volunteers =
-    values.max_volunteers != null && !Number.isNaN(values.max_volunteers)
-      ? values.max_volunteers
-      : null;
-
-  const { schedule_mode, location: _locations, type: _type, max_volunteers: _max, ...rest } = values;
-
-  if (schedule_mode === "single") {
-    return {
-      ...rest,
-      location,
-      type,
-      max_volunteers,
-      external_links,
-      studio_partners,
-      dates_description: null,
-      schedule_slots: [],
-      starts_at: new Date(values.starts_at).toISOString(),
-      ends_at: new Date(values.ends_at).toISOString(),
-    };
-  }
-
-  if (schedule_mode === "multiple") {
-    return {
-      ...rest,
-      location,
-      type,
-      max_volunteers,
-      external_links,
-      studio_partners,
-      dates_description: null,
-      starts_at: null,
-      ends_at: null,
-      schedule_slots: values.schedule_slots.map((slot) => ({
-        starts_at: new Date(slot.starts_at).toISOString(),
-        ends_at: new Date(slot.ends_at).toISOString(),
-      })),
-    };
-  }
-
-  return {
-    ...rest,
-    location,
-    type,
-    max_volunteers,
-    external_links,
-    studio_partners,
-    dates_description: (values.dates_description ?? "").trim() || null,
-    schedule_slots: [],
-    starts_at: null,
-    ends_at: null,
-  };
-}
 
 export function EventsManagement() {
   const { token } = useAuth();
@@ -217,9 +129,10 @@ export function EventsManagement() {
         },
       );
       if (!ok) {
-        setActionError(
-          (data as { msg?: string })?.msg ?? "Failed to create event",
-        );
+        const msg =
+          (data as { msg?: string })?.msg ?? "Failed to create event";
+        console.error("[create event] API error:", data);
+        setActionError(msg);
         return;
       }
       const eventId = data?.event?.id;

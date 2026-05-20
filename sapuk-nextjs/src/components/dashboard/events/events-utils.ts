@@ -148,6 +148,104 @@ export function formatEventLocations(
   return list.join(" · ");
 }
 
+/** Convert datetime-local value to ISO string for the API; returns null if empty/invalid. */
+export function toEventIsoTimestamp(value: string | undefined): string | null {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) return null;
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
+/** Build POST/PUT body — only known API fields (avoids leaking form-only keys). */
+export function toEventApiBody(values: EventFormValues) {
+  const external_links = values.external_links
+    .filter((l) => l.label.trim() && l.url.trim())
+    .map((l) => ({
+      label: l.label.trim(),
+      url: l.url.trim(),
+      kind: l.kind,
+    }));
+
+  const studio_partners = values.studio_partners
+    .filter((p) => {
+      const name = p.name.trim();
+      const loc = (p.location ?? "").trim();
+      const img = (p.imageSrc ?? "").trim();
+      const desc = (p.description ?? "").trim();
+      const hasSocial = (p.socialLinks ?? []).some(
+        (s) => s.network.trim() && s.url.trim(),
+      );
+      return name || loc || img || desc || hasSocial;
+    })
+    .map((p) => ({
+      name: p.name.trim(),
+      location: (p.location ?? "").trim() || null,
+      imageSrc: (p.imageSrc ?? "").trim() || null,
+      description: (p.description ?? "").trim() || null,
+      socialLinks: (p.socialLinks ?? [])
+        .filter((s) => s.network.trim() && s.url.trim())
+        .map((s) => ({
+          network: s.network.trim(),
+          url: s.url.trim(),
+        })),
+    }));
+
+  const location = values.location.map((l) => l.trim()).filter(Boolean);
+  const type = (values.type ?? "").trim() || null;
+  const max_volunteers =
+    values.max_volunteers != null && !Number.isNaN(values.max_volunteers)
+      ? values.max_volunteers
+      : null;
+
+  const cover_image = values.cover_image?.trim() || null;
+
+  const base = {
+    title: values.title.trim(),
+    description: values.description.trim(),
+    cover_image,
+    location,
+    type,
+    max_volunteers,
+    is_active: values.is_active,
+    external_links,
+    studio_partners,
+  };
+
+  if (values.schedule_mode === "single") {
+    const starts_at = toEventIsoTimestamp(values.starts_at);
+    const ends_at = toEventIsoTimestamp(values.ends_at);
+    return {
+      ...base,
+      dates_description: null,
+      schedule_slots: [] as { starts_at: string; ends_at: string }[],
+      starts_at,
+      ends_at,
+    };
+  }
+
+  if (values.schedule_mode === "multiple") {
+    return {
+      ...base,
+      dates_description: null,
+      starts_at: null,
+      ends_at: null,
+      schedule_slots: values.schedule_slots.map((slot) => ({
+        starts_at: toEventIsoTimestamp(slot.starts_at),
+        ends_at: toEventIsoTimestamp(slot.ends_at),
+      })),
+    };
+  }
+
+  return {
+    ...base,
+    dates_description: (values.dates_description ?? "").trim() || null,
+    schedule_slots: [] as { starts_at: string; ends_at: string }[],
+    starts_at: null,
+    ends_at: null,
+  };
+}
+
 export const defaultEventValues: EventFormValues = {
   title: "",
   description: "",

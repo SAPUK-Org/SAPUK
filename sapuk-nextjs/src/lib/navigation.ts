@@ -47,6 +47,61 @@ export const dropdownItems: DropdownItem[] = [
   },
 ];
 
+export type FooterLink = { href: string; label: string };
+
+export type FooterLinkGroup = {
+  title: string;
+  links: FooterLink[];
+};
+
+/** Public site routes for the footer (excludes staff dashboard). */
+export const footerLinkGroups: FooterLinkGroup[] = [
+  {
+    title: "How we can help you",
+    links: [
+      { href: "/how-we-can-help-you/projects", label: "Projects" },
+      { href: "/how-we-can-help-you/local", label: "Local services" },
+      { href: "/how-we-can-help-you/local/dewsbury", label: "Dewsbury" },
+      { href: "/how-we-can-help-you/community", label: "Blogs & community" },
+      {
+        href: "/how-we-can-help-you/downloadable-media",
+        label: "Downloadable media",
+      },
+      { href: "/how-we-can-help-you/contact-us", label: "Contact us" },
+      { href: "/bookings", label: "Bookings" },
+    ],
+  },
+  {
+    title: "SAPUK Hub",
+    links: [
+      { href: "/sapukhub/students", label: "Students" },
+      {
+        href: "/sapukhub/supporting-suicidal-thoughts",
+        label: "Supporting someone",
+      },
+      { href: "/sapukhub/suicidology", label: "Suicidology" },
+      { href: "/sapukhub/sapheals", label: "My healing checklist" },
+      { href: "/sapukhub/newsletter", label: "Newsletter" },
+    ],
+  },
+  {
+    title: "Get involved",
+    links: [
+      { href: "/donate", label: "Donate" },
+      { href: "/volunteer", label: "Volunteer" },
+      { href: "/fundraise", label: "Fundraise" },
+    ],
+  },
+  {
+    title: "About SAPUK",
+    links: [
+      { href: "/", label: "Home" },
+      { href: "/sapevolution", label: "The beginning" },
+      { href: "/sapfamily", label: "The team" },
+    ],
+  },
+];
+
 export const pageTitles: Record<string, string> = {
   "/sapukhub/students": "Student Support Hub",
   "/sapukhub/supporting-suicidal-thoughts": "Supporting Someone",

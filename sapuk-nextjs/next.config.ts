@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
       {
         hostname: "www.paypalobjects.com",
       },
+      {
+        hostname: "picsum.photos",
+      },
     ],
   },
 };

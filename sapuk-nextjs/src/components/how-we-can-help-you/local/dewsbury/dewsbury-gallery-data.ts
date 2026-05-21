@@ -27,7 +27,7 @@ export const DEWSBURY_GALLERY_SLIDES: DewsburyGallerySlide[] = [
   },
   {
     id: "community-stall",
-    src: "https://bi4a1aeb4i.ufs.sh/f/akEZKbpzclMNTsWgI1jLz5HsW7p1MjvwBa8RxQV6J0ENkuAr",
+    src: "https://bi4a1aeb4i.ufs.sh/f/akEZKbpzclMN0W36V4DzKpQyTlM5Y9rC3gIVt8sbjuxod6PL",
     alt: "SAPUK community stall at Dewsbury Moor Children's Centre",
     caption: "Community stalls and holiday food pantries across Kirklees",
   },
@@ -36,11 +36,5 @@ export const DEWSBURY_GALLERY_SLIDES: DewsburyGallerySlide[] = [
     src: "https://bi4a1aeb4i.ufs.sh/f/akEZKbpzclMNyrrPxEHk3E89gHsFCaqbnfw5LlhJ20vRYjez",
     alt: "SAPUK food pantry at Dewsbury Moor Children's Centre",
     caption: "Holiday food pantries across Kirklees",
-  },
-  {
-    id: "summer-food-pantry",
-    src: "https://bi4a1aeb4i.ufs.sh/f/akEZKbpzclMN0W36V4DzKpQyTlM5Y9rC3gIVt8sbjuxod6PL",
-    alt: "SAPUK summer food pantry at Dewsbury Moor Children's Centre",
-    caption: "Summer food pantries across Kirklees",
   },
 ];

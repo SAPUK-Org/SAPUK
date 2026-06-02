@@ -62,6 +62,7 @@ export const footerLinkGroups: FooterLinkGroup[] = [
       { href: "/how-we-can-help-you/projects", label: "Projects" },
       { href: "/how-we-can-help-you/local", label: "Local services" },
       { href: "/how-we-can-help-you/local/dewsbury", label: "Dewsbury" },
+      { href: "/how-we-can-help-you/local/lancashire", label: "Lancashire" },
       { href: "/how-we-can-help-you/community", label: "Blogs & community" },
       {
         href: "/how-we-can-help-you/downloadable-media",

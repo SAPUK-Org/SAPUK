@@ -7,7 +7,14 @@ export default function RegionsSection() {
         We cover the following areas:
       </h2>
       <ul className="list-disc list-inside text-zinc-800 space-y-1.5 flex flex-wrap gap-2 pr-4">
-        <li>Blackburn</li>
+        <li>
+          <Link
+            href="/how-we-can-help-you/local/lancashire"
+            className="text-link hover:underline"
+          >
+            Lancashire
+          </Link>
+        </li>
         <li>Stafford</li>
         <li>
           <Link

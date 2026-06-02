@@ -174,8 +174,7 @@ const ExpandedView = ({
   onClose: () => void;
 }) => {
   const eventCount = data.events.length;
-  const eventCountLabel =
-    eventCount === 1 ? "1 event" : `${eventCount} events`;
+  const eventCountLabel = eventCount === 1 ? "1 event" : `${eventCount} events`;
   return (
     <motion.div
       className="absolute inset-0 z-20 overflow-hidden rounded-xl bg-background"
@@ -208,7 +207,7 @@ const ExpandedView = ({
           <motion.button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-900 transition-colors hover:bg-zinc-200 hover:text-foreground"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             initial={{ opacity: 0, rotate: -90 }}

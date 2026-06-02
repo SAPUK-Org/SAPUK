@@ -49,6 +49,7 @@ To provide accessible mental health support and suicide prevention resources thr
 | Food Pantry | Essential supplies for vulnerable people | Those in need | Active |
 | Safe Spaces | Physical support locations | Anyone seeking in-person help | See website for locations |
 | Local Services (Dewsbury/Kirklees) | Safe spaces, walk and talk, board game club, food pantries, virtual safe space | Kirklees area | /how-we-can-help-you/local/dewsbury |
+| Local Services (Lancashire) | Safe spaces, walk and talk, Longridge days out, art week, community events | Lancashire | /how-we-can-help-you/local/lancashire |
 | SAPUKWarriors | Volunteer community | Supporters 18+ | Active |
 | Suicidology Seminar | Educational workshops | Professionals & public | Scheduled events |
 

@@ -87,12 +87,38 @@ export default function Footer() {
                 </span>
                 <br />
                 <Link
-                  href="mailto:dewsburyoffice@suicideapuk.co.uk"
+                  href="/how-we-can-help-you/local/dewsbury"
                   className={cn(FOOTER_LINK_CLASS, "inline-block mt-1")}
+                >
+                  Local services
+                </Link>
+                {" · "}
+                <Link
+                  href="mailto:dewsburyoffice@suicideapuk.co.uk"
+                  className={cn(FOOTER_LINK_CLASS, "inline-block")}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   dewsburyoffice@suicideapuk.co.uk
+                </Link>
+              </p>
+              <p>
+                <span className="font-medium text-white">Lancashire</span>
+                <br />
+                <Link
+                  href="/how-we-can-help-you/local/lancashire"
+                  className={cn(FOOTER_LINK_CLASS, "inline-block mt-1")}
+                >
+                  Local services
+                </Link>
+                {" · "}
+                <Link
+                  href="mailto:lancashireoffice@suicideapuk.co.uk"
+                  className={cn(FOOTER_LINK_CLASS, "inline-block")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  lancashireoffice@suicideapuk.co.uk
                 </Link>
               </p>
             </address>

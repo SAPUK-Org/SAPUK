@@ -40,6 +40,25 @@ export default function ContactInfo() {
               </a>
             </p>
           </div>
+          <div>
+            <p className="font-semibold">Lancashire -</p>
+            <p>
+              Events and local programmes:{" "}
+              <Link
+                href="/how-we-can-help-you/local/lancashire"
+                className="text-link font-medium hover:underline"
+              >
+                view local services
+              </Link>
+              {" · "}
+              <a
+                href="mailto:lancashireoffice@suicideapuk.co.uk"
+                className="text-link font-medium hover:underline"
+              >
+                lancashireoffice@suicideapuk.co.uk
+              </a>
+            </p>
+          </div>
         </div>
       </div>
 

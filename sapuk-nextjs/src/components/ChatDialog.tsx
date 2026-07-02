@@ -13,6 +13,7 @@ interface ChatDialogProps {
 }
 
 export function ChatDialog({ isOpen, setIsOpen }: ChatDialogProps) {
+  // Temp to push to new repo
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-h-[85vh] w-full max-w-2xl overflow-hidden flex flex-col bg-zinc-100">

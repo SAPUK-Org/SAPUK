@@ -94,20 +94,19 @@ export function RearrangeableGrid({
                   variant={locked ? "outline" : "default"}
                   size="sm"
                   onClick={() => setLocked(!locked)}
-                  className={!locked ? "bg-primary text-primary-foreground" : ""}
-                />
+                >
+                  {locked ? (
+                    <>
+                      <Lock className="h-3.5 w-3.5 mr-1.5" /> Layout Locked
+                    </>
+                  ) : (
+                    <>
+                      <Unlock className="h-3.5 w-3.5 mr-1.5" /> Rearranging
+                    </>
+                  )}
+                </Button>
               }
-            >
-              {locked ? (
-                <>
-                  <Lock className="h-3.5 w-3.5 mr-1.5" /> Layout Locked
-                </>
-              ) : (
-                <>
-                  <Unlock className="h-3.5 w-3.5 mr-1.5" /> Rearranging
-                </>
-              )}
-            </TooltipTrigger>
+            />
             <TooltipContent>
               {locked
                 ? "Click to unlock and rearrange cards"
@@ -123,11 +122,11 @@ export function RearrangeableGrid({
                     size="sm"
                     onClick={resetOrder}
                     className="text-muted-foreground"
-                  />
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Reset
+                  </Button>
                 }
-              >
-                <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Reset
-              </TooltipTrigger>
+              />
               <TooltipContent>Reset to default layout</TooltipContent>
             </Tooltip>
           )}

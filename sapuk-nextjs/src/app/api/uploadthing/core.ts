@@ -8,6 +8,7 @@ const resourceUploaderInputSchema = z
   .object({
     attachableType: z.string().min(1).optional(),
     attachableId: z.number().int().positive().optional(),
+    persist: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     const hasType = data.attachableType != null;
@@ -30,16 +31,25 @@ const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
 
 async function persistResourceToBackend(
   file: { url?: string; ufsUrl?: string; type: string; name: string; key: string },
-  metadata: { userId: string; attachableType?: string; attachableId?: number },
+  metadata: {
+    userId: string;
+    attachableType?: string;
+    attachableId?: number;
+    persist?: boolean;
+  },
 ) {
-  if (!UPLOAD_CALLBACK_SECRET) {
-    console.warn("UPLOAD_CALLBACK_SECRET not set; skipping resource persistence");
+  if (metadata.persist === false) {
     return;
+  }
+
+  if (!UPLOAD_CALLBACK_SECRET) {
+    throw new UploadThingError(
+      "UPLOAD_CALLBACK_SECRET is not set; resource was not saved",
+    );
   }
   const url = file.ufsUrl ?? file.url;
   if (!url) {
-    console.error("File has no url or ufsUrl");
-    return;
+    throw new UploadThingError("Uploaded file has no URL");
   }
   const body = {
     url,
@@ -60,7 +70,9 @@ async function persistResourceToBackend(
   });
   if (!res.ok) {
     const err = await res.text();
-    console.error("Failed to persist resource to backend:", res.status, err);
+    throw new UploadThingError(
+      `Failed to save resource to backend (${res.status}): ${err}`,
+    );
   }
 }
 
@@ -70,7 +82,12 @@ function createUploadCompleteHandler() {
     metadata,
     file,
   }: {
-    metadata: { userId: string; attachableType?: string; attachableId?: number };
+    metadata: {
+      userId: string;
+      attachableType?: string;
+      attachableId?: number;
+      persist?: boolean;
+    };
     file: { url?: string; ufsUrl?: string; type: string; name: string; key: string };
   }) => {
     await persistResourceToBackend(file, metadata);
@@ -136,9 +153,10 @@ export const ourFileRouter = {
           userId: user.id,
           attachableType: inp.attachableType,
           attachableId: inp.attachableId,
+          persist: inp.persist,
         };
       }
-      return { userId: user.id };
+      return { userId: user.id, persist: inp.persist };
     })
     .onUploadComplete(createUploadCompleteHandler()),
 } satisfies FileRouter;

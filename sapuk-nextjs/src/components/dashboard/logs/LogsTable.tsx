@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -94,12 +93,16 @@ export function LogsTable() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Audit logs</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4 space-y-2">
+    <div className="flex flex-col space-y-6 bg-background p-6">
+      <div>
+        <h1 className="text-2xl font-bold">Audit logs</h1>
+        <p className="text-sm text-muted-foreground">
+          Filter and review dashboard activity.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div className="rounded-lg border border-border bg-white p-4 [&_input]:bg-white [&_button[role=combobox]]:bg-white">
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex flex-col space-y-1 w-[120px]">
               <Label htmlFor="logs-user-id">User ID</Label>
@@ -220,7 +223,7 @@ export function LogsTable() {
         </div>
 
         {loading ? (
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-lg border border-border bg-white p-4">
             <Skeleton className="h-6 w-48" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
@@ -233,7 +236,7 @@ export function LogsTable() {
             No logs have been recorded yet.
           </p>
         ) : (
-          <div className="rounded-md border -mx-1">
+          <div className="rounded-md border border-border bg-white">
             <Table className="min-w-[900px] text-xs">
               <TableHeader>
                 <TableRow>
@@ -274,7 +277,7 @@ export function LogsTable() {
             </Table>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

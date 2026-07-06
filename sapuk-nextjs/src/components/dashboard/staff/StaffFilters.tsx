@@ -30,14 +30,15 @@ export function StaffFilters({
   onActiveFilterChange,
 }: StaffFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="rounded-lg border border-border bg-white p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div className="flex flex-col sm:flex-row gap-2">
         <Input
           placeholder="Search staff..."
           value={searchInput}
           onChange={(e) => onSearchInputChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onSearch()}
-          className="w-full sm:w-64"
+          className="w-full bg-white sm:w-64"
         />
         <Button
           variant="secondary"
@@ -50,7 +51,7 @@ export function StaffFilters({
       </div>
       <div className="flex flex-col sm:flex-row gap-2">
         <Select value={roleFilter} onValueChange={onRoleFilterChange}>
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="w-full bg-white sm:w-40">
             <SelectValue placeholder="Role" />
           </SelectTrigger>
           <SelectContent>
@@ -61,7 +62,7 @@ export function StaffFilters({
           </SelectContent>
         </Select>
         <Select value={activeFilter} onValueChange={onActiveFilterChange}>
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="w-full bg-white sm:w-40">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -70,6 +71,7 @@ export function StaffFilters({
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
+      </div>
       </div>
     </div>
   );

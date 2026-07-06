@@ -31,19 +31,23 @@ export function ResourcesManagement() {
   const [editNotes, setEditNotes] = useState("");
   const [savingId, setSavingId] = useState<number | null>(null);
 
-  const fetchResources = useCallback(async () => {
+  const fetchResources = useCallback(async (options?: { silent?: boolean }) => {
     if (!token) return;
-    setLoading(true);
-    setError(null);
+    if (!options?.silent) {
+      setLoading(true);
+      setError(null);
+    }
     const { data, ok } = await api<{ resources?: Resource[]; msg?: string }>(
       "/api/resources",
       "GET",
       { token },
     );
-    setLoading(false);
+    if (!options?.silent) {
+      setLoading(false);
+    }
     if (ok && data?.resources) {
       setResources(data.resources);
-    } else {
+    } else if (!options?.silent) {
       setError((data as { msg?: string })?.msg ?? "Failed to load resources");
       setResources([]);
     }
@@ -122,6 +126,10 @@ export function ResourcesManagement() {
     }
   }, [token, resourceToEdit, editFileName, editNotes, handleEditClose, fetchResources]);
 
+  const handleUploadComplete = useCallback(async () => {
+    await fetchResources({ silent: true });
+  }, [fetchResources]);
+
   useEffect(() => {
     fetchResources();
   }, [fetchResources]);
@@ -180,10 +188,7 @@ export function ResourcesManagement() {
           />
 
           <ResourceUploadZone
-            onUploadComplete={() => {
-              toast.success("Upload completed");
-              fetchResources();
-            }}
+            onUploadComplete={handleUploadComplete}
             onUploadError={(error: Error) => {
               toast.error(`Upload failed: ${error.message}`);
             }}

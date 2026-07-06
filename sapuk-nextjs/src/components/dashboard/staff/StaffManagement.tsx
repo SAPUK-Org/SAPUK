@@ -2,13 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -211,11 +204,13 @@ export function StaffManagement({ token }: { token: string }) {
   };
 
   return (
-    <Card className="my-6">
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="flex flex-col space-y-6 bg-background p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>Volunteer management</CardTitle>
-          <CardDescription>Manage volunteer accounts and roles</CardDescription>
+          <h1 className="text-2xl font-bold">Volunteer management</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage volunteer accounts and roles
+          </p>
         </div>
         <Button
           onClick={() => setCreateOpen(true)}
@@ -223,8 +218,9 @@ export function StaffManagement({ token }: { token: string }) {
         >
           Add volunteer
         </Button>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </div>
+
+      <div className="space-y-4">
         {actionError && (
           <p className="text-sm text-destructive font-medium">{actionError}</p>
         )}
@@ -272,7 +268,7 @@ export function StaffManagement({ token }: { token: string }) {
           onPrevious={() => setPage((p) => Math.max(1, p - 1))}
           onNext={() => setPage((p) => p + 1)}
         />
-      </CardContent>
+      </div>
 
       <CreateStaffDialog
         open={createOpen}
@@ -299,6 +295,6 @@ export function StaffManagement({ token }: { token: string }) {
         onConfirm={onDeleteConfirm}
         actionLoading={actionLoading}
       />
-    </Card>
+    </div>
   );
 }

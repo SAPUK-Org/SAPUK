@@ -34,7 +34,7 @@ export function StaffTable({
   onDelete,
 }: StaffTableProps) {
   return (
-    <div className="rounded-md border -mx-1">
+    <div className="rounded-md border border-border bg-white">
       <Table className="min-w-[640px]">
         <TableHeader>
           <TableRow>

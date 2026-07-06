@@ -1,0 +1,8 @@
+# SAPUK Supabase project config (migrations only — app uses DATABASE_URL via pg Pool).
+project_id = "sapuk"
+
+[db]
+major_version = 15
+
+[db.migrations]
+enabled = true

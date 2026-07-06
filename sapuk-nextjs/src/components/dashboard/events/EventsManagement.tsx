@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 import { useUploadThing } from "@/lib/uploadthing";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type Resolver } from "react-hook-form";
@@ -375,52 +374,53 @@ export function EventsManagement() {
   });
 
   return (
-    <div className="flex flex-col bg-background p-6">
+    <div className="flex flex-col space-y-6 bg-background p-6">
       {actionError && !createOpen && !editOpen && !deleteOpen ? (
-        <p className="mb-4 text-sm text-destructive" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {actionError}
         </p>
       ) : null}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>All events</CardTitle>
-          <Button
-            onClick={() => {
-              setCreatePendingFiles([]);
-              setActionError(null);
-              setCreateOpen(true);
-            }}
-          >
-            Add event
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p className="text-muted-foreground py-8 text-center">
-              Loading events…
-            </p>
-          ) : error ? (
-            <p className="text-destructive py-8 text-center">{error}</p>
-          ) : events.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">
-              No events yet. Create one to get started.
-            </p>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {sortedEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  onToggleActive={onToggleActive}
-                  isToggleLoading={togglingId === event.id}
-                  onEdit={openEdit}
-                  onDelete={openDelete}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Events</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage events shown on the public projects page.
+          </p>
+        </div>
+        <Button
+          onClick={() => {
+            setCreatePendingFiles([]);
+            setActionError(null);
+            setCreateOpen(true);
+          }}
+        >
+          Add event
+        </Button>
+      </div>
+
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading events…</p>
+      ) : error ? (
+        <p className="text-sm text-destructive">{error}</p>
+      ) : sortedEvents.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No events yet. Create one to get started.
+        </p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {sortedEvents.map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              onToggleActive={onToggleActive}
+              isToggleLoading={togglingId === event.id}
+              onEdit={openEdit}
+              onDelete={openDelete}
+            />
+          ))}
+        </div>
+      )}
 
       <EventFormDialog
         open={createOpen}

@@ -2,6 +2,7 @@ import FundraiseHero from "@/components/fundraise/hero";
 import FacebookEmbed from "@/components/fundraise/facebook-embed";
 import FundraisingIdeas from "@/components/fundraise/fundraising-ideas";
 import SupportSection from "@/components/fundraise/support-section";
+import FundraisingChampsPreview from "@/components/fundraise/FundraisingChampsPreview";
 import ContactCTA from "@/components/fundraise/contact-cta";
 
 export default function FundraisePage() {
@@ -12,6 +13,7 @@ export default function FundraisePage() {
         <FacebookEmbed />
         <FundraisingIdeas />
         <SupportSection />
+        <FundraisingChampsPreview />
         <ContactCTA />
       </div>
     </section>

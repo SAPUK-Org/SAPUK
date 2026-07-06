@@ -1,9 +1,9 @@
 import { users } from "./users";
-import { events } from "./events";
-import { crisis_resources } from "./crisis-resources";
+import { fundraising_champs } from "./fundraising-champs";
+import { community_causes } from "./community-causes";
 
 export const devData = {
   users,
-  events,
-  crisis_resources,
+  fundraising_champs,
+  community_causes,
 };

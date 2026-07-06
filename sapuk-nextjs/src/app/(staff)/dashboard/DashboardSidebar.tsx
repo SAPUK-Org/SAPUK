@@ -10,6 +10,8 @@ import {
   File,
   ArrowLeft,
   Logs,
+  Heart,
+  Trophy,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -106,19 +108,47 @@ export function DashboardSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               {canManageEvents && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === "/dashboard/events"}
-                    tooltip="Events"
-                    className="w-36"
-                  >
-                    <Link href="/dashboard/events">
-                      <Calendar />
-                      <span>Events</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === "/dashboard/events"}
+                      tooltip="Events"
+                      className="w-36"
+                    >
+                      <Link href="/dashboard/events">
+                        <Calendar />
+                        <span>Events</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === "/dashboard/fundraising-champs"}
+                      tooltip="Fundraising Champs"
+                      className="w-36"
+                    >
+                      <Link href="/dashboard/fundraising-champs">
+                        <Trophy />
+                        <span>Champs</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === "/dashboard/community-causes"}
+                      tooltip="Community Causes"
+                      className="w-36"
+                    >
+                      <Link href="/dashboard/community-causes">
+                        <Heart />
+                        <span>Causes</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
               )}
             </SidebarMenu>
           </SidebarGroupContent>

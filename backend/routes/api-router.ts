@@ -10,12 +10,16 @@ import { requireAuth } from "../middleware/auth";
 import { createResource } from "../controllers/resources-controller";
 import { requireValidUploadSecret } from "../middleware/auth";
 import publicEventsRouter from "./public/public-events-router";
+import publicFundraisingChampsRouter from "./public/public-fundraising-champs-router";
+import publicCommunityCausesRouter from "./public/public-community-causes-router";
 
 apiRouter.get("/", (req, res) => {
   res.status(200).send({ endpoints: endpoints });
 });
 
 apiRouter.use("/public/events", publicEventsRouter);
+apiRouter.use("/public/fundraising-champs", publicFundraisingChampsRouter);
+apiRouter.use("/public/community-causes", publicCommunityCausesRouter);
 
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", usersRouter);

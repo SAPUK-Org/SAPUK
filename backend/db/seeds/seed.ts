@@ -7,14 +7,18 @@ import { crisis_resources } from "../data/test-data/crisis-resources";
 import { useful_links } from "../data/test-data/useful-links";
 import { notes } from "../data/test-data/notes";
 import { note_comments } from "../data/test-data/note-comments";
+import { fundraising_champs as testFundraisingChamps } from "../data/test-data/fundraising-champs";
+import { community_causes as testCommunityCauses } from "../data/test-data/community-causes";
 
-const seed = async ({ users }: SeedData) => {
+const seed = async ({ users, fundraising_champs, community_causes }: SeedData) => {
   try {
     await db.query("DROP TABLE IF EXISTS audit_logs CASCADE");
     await db.query("DROP TABLE IF EXISTS note_comments CASCADE");
     await db.query("DROP TABLE IF EXISTS notes CASCADE");
     await db.query("DROP TABLE IF EXISTS useful_links CASCADE");
     await db.query("DROP TABLE IF EXISTS crisis_resources CASCADE");
+    await db.query("DROP TABLE IF EXISTS community_causes CASCADE");
+    await db.query("DROP TABLE IF EXISTS fundraising_champs CASCADE");
     await db.query("DROP TABLE IF EXISTS resources CASCADE");
     await db.query("DROP TABLE IF EXISTS events CASCADE");
     await db.query("DROP TABLE IF EXISTS users CASCADE");
@@ -149,6 +153,40 @@ const seed = async ({ users }: SeedData) => {
       );
     `);
 
+    await db.query(`
+      CREATE TABLE fundraising_champs (
+        id SERIAL PRIMARY KEY,
+        slug TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        champ_type TEXT NOT NULL DEFAULT 'individual',
+        summary TEXT NOT NULL,
+        body TEXT,
+        image TEXT,
+        logo TEXT,
+        website_url TEXT,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    await db.query(`
+      CREATE TABLE community_causes (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        image TEXT,
+        link_url TEXT,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
     // Insert users into the `users` table (hash passwords before insert)
     const insertUsersQueryString = format(
       `INSERT INTO users (username, email, profile_picture, password_hash, role, is_active) VALUES %L RETURNING id`,
@@ -223,6 +261,44 @@ const seed = async ({ users }: SeedData) => {
       note_comments.map((nc) => [nc.note_id, nc.author_id, nc.content]),
     );
     await db.query(insertNoteCommentsQueryString);
+
+    const champsToInsert = fundraising_champs ?? testFundraisingChamps;
+    if (champsToInsert.length > 0) {
+      const insertChampsQueryString = format(
+        `INSERT INTO fundraising_champs (slug, name, champ_type, summary, body, image, logo, website_url, sort_order, is_active, created_by) VALUES %L RETURNING id`,
+        champsToInsert.map((champ) => [
+          champ.slug,
+          champ.name,
+          champ.champ_type,
+          champ.summary,
+          champ.body ?? null,
+          champ.image ?? null,
+          champ.logo ?? null,
+          champ.website_url ?? null,
+          champ.sort_order ?? 0,
+          champ.is_active ?? true,
+          champ.created_by ?? null,
+        ]),
+      );
+      await db.query(insertChampsQueryString);
+    }
+
+    const causesToInsert = community_causes ?? testCommunityCauses;
+    if (causesToInsert.length > 0) {
+      const insertCausesQueryString = format(
+        `INSERT INTO community_causes (name, summary, image, link_url, sort_order, is_active, created_by) VALUES %L RETURNING id`,
+        causesToInsert.map((cause) => [
+          cause.name,
+          cause.summary,
+          cause.image ?? null,
+          cause.link_url ?? null,
+          cause.sort_order ?? 0,
+          cause.is_active ?? true,
+          cause.created_by ?? null,
+        ]),
+      );
+      await db.query(insertCausesQueryString);
+    }
   } catch (err) {
     console.error("Error seeding database:", err);
   }

@@ -88,23 +88,25 @@ export function RearrangeableGrid({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={locked ? "outline" : "default"}
-                size="sm"
-                onClick={() => setLocked(!locked)}
-                className={!locked ? "bg-primary text-primary-foreground" : ""}
-              >
-                {locked ? (
-                  <>
-                    <Lock className="h-3.5 w-3.5 mr-1.5" /> Layout Locked
-                  </>
-                ) : (
-                  <>
-                    <Unlock className="h-3.5 w-3.5 mr-1.5" /> Rearranging
-                  </>
-                )}
-              </Button>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant={locked ? "outline" : "default"}
+                  size="sm"
+                  onClick={() => setLocked(!locked)}
+                  className={!locked ? "bg-primary text-primary-foreground" : ""}
+                />
+              }
+            >
+              {locked ? (
+                <>
+                  <Lock className="h-3.5 w-3.5 mr-1.5" /> Layout Locked
+                </>
+              ) : (
+                <>
+                  <Unlock className="h-3.5 w-3.5 mr-1.5" /> Rearranging
+                </>
+              )}
             </TooltipTrigger>
             <TooltipContent>
               {locked
@@ -114,15 +116,17 @@ export function RearrangeableGrid({
           </Tooltip>
           {!locked && (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={resetOrder}
-                  className="text-muted-foreground"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Reset
-                </Button>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetOrder}
+                    className="text-muted-foreground"
+                  />
+                }
+              >
+                <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Reset
               </TooltipTrigger>
               <TooltipContent>Reset to default layout</TooltipContent>
             </Tooltip>

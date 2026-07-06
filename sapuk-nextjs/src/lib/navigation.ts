@@ -35,6 +35,7 @@ export const dropdownItems: DropdownItem[] = [
       { href: "/volunteer", text: "Volunteer" },
       { href: "/donate", text: "Donate" },
       { href: "/fundraise", text: "Fundraise" },
+      { href: "/fundraise/champs", text: "Fundraising Champs" },
     ],
   },
   {
@@ -91,6 +92,7 @@ export const footerLinkGroups: FooterLinkGroup[] = [
       { href: "/donate", label: "Donate" },
       { href: "/volunteer", label: "Volunteer" },
       { href: "/fundraise", label: "Fundraise" },
+      { href: "/fundraise/champs", label: "Fundraising champs" },
     ],
   },
   {
@@ -125,5 +127,6 @@ export const pageTitles: Record<string, string> = {
   "/volunteer": "Volunteer With Us",
   "/why-donate": "Why Donate to Us?",
   "/fundraise": "Fundraising",
+  "/fundraise/champs": "Fundraising Champs",
   "/bookings": "Bookings",
 };

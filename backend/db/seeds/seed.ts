@@ -2,15 +2,29 @@ import bcrypt from "bcrypt";
 import db from "../connection";
 import format from "pg-format";
 import { SeedData } from "../../types";
-import { events } from "../data/test-data/events";
-import { crisis_resources } from "../data/test-data/crisis-resources";
-import { useful_links } from "../data/test-data/useful-links";
-import { notes } from "../data/test-data/notes";
-import { note_comments } from "../data/test-data/note-comments";
+import { events as testEvents } from "../data/test-data/events";
+import { crisis_resources as testCrisisResources } from "../data/test-data/crisis-resources";
+import { useful_links as testUsefulLinks } from "../data/test-data/useful-links";
+import { notes as testNotes } from "../data/test-data/notes";
+import { note_comments as testNoteComments } from "../data/test-data/note-comments";
 import { fundraising_champs as testFundraisingChamps } from "../data/test-data/fundraising-champs";
 import { community_causes as testCommunityCauses } from "../data/test-data/community-causes";
 
-const seed = async ({ users, fundraising_champs, community_causes }: SeedData) => {
+const seed = async ({
+  users,
+  events: seedEvents,
+  notes: seedNotes,
+  note_comments: seedNoteComments,
+  crisis_resources: seedCrisisResources,
+  useful_links: seedUsefulLinks,
+  fundraising_champs,
+  community_causes,
+}: SeedData) => {
+  const events = seedEvents ?? testEvents;
+  const notes = seedNotes ?? testNotes;
+  const note_comments = seedNoteComments ?? testNoteComments;
+  const crisis_resources = seedCrisisResources ?? testCrisisResources;
+  const useful_links = seedUsefulLinks ?? testUsefulLinks;
   try {
     await db.query("DROP TABLE IF EXISTS audit_logs CASCADE");
     await db.query("DROP TABLE IF EXISTS note_comments CASCADE");
@@ -235,7 +249,9 @@ const seed = async ({ users, fundraising_champs, community_causes }: SeedData) =
         crisisResource.is_active,
       ]),
     );
-    await db.query(insertCrisisResourcesQueryString);
+    if (crisis_resources.length > 0) {
+      await db.query(insertCrisisResourcesQueryString);
+    }
 
     const insertUsefulLinksQueryString = format(
       `INSERT INTO useful_links (title, url, description, sort_order, is_active, metadata) VALUES %L RETURNING id`,
@@ -248,19 +264,25 @@ const seed = async ({ users, fundraising_champs, community_causes }: SeedData) =
         link.metadata ? JSON.stringify(link.metadata) : null,
       ]),
     );
-    await db.query(insertUsefulLinksQueryString);
+    if (useful_links.length > 0) {
+      await db.query(insertUsefulLinksQueryString);
+    }
 
     const insertNotesQueryString = format(
       `INSERT INTO notes (title, content, author_id) VALUES %L RETURNING id`,
       notes.map((note) => [note.title, note.content, note.author_id]),
     );
-    await db.query(insertNotesQueryString);
+    if (notes.length > 0) {
+      await db.query(insertNotesQueryString);
+    }
 
     const insertNoteCommentsQueryString = format(
       `INSERT INTO note_comments (note_id, author_id, content) VALUES %L RETURNING id`,
       note_comments.map((nc) => [nc.note_id, nc.author_id, nc.content]),
     );
-    await db.query(insertNoteCommentsQueryString);
+    if (note_comments.length > 0) {
+      await db.query(insertNoteCommentsQueryString);
+    }
 
     const champsToInsert = fundraising_champs ?? testFundraisingChamps;
     if (champsToInsert.length > 0) {

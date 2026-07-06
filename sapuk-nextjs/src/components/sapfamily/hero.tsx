@@ -1,18 +1,29 @@
+import { founder } from "./team-data";
+import TeamStatsBar from "./TeamStatsBar";
+import FeaturedFounderCard from "./FeaturedFounderCard";
+
 export default function SapFamilyHero() {
   return (
-    <section className="py-10 flex flex-col items-center justify-center px-4">
-      <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6">
-        Welcome to the SAPUK Family
-      </h1>
-      <div className="prose prose-lg max-w-3xl text-center text-base md:text-lg text-gray-600">
-        <p>
-          Welcome to part of the SAPUK family. Here you will get to see who is
-          within management at SAPUK. We are a young community, but we are fresh
-          and focused. <br />
-          SAPUK does this so that you can feel welcome and understand who you
-          are creating safe spaces with. This creates a bond in a friendly
-          manner as encouraged by counsellors and therapists.
-        </p>
+    <section className="mb-4">
+      <div className="flex flex-col items-stretch gap-10 lg:flex-row lg:gap-12">
+        <div className="flex-1 space-y-6">
+          <p className="text-sm font-semibold uppercase tracking-wider text-button-blue">
+            The Team
+          </p>
+          <h1 className="text-3xl font-bold leading-tight text-zinc-900 sm:text-4xl lg:text-5xl">
+            Meet the SAPUK Family
+          </h1>
+          <p className="max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg">
+            We are a young community, but we are fresh and focused. SAPUK does
+            this so that you can feel welcome and understand who you are creating
+            safe spaces with — building bonds in a friendly manner, as encouraged
+            by counsellors and therapists.
+          </p>
+          <TeamStatsBar />
+        </div>
+        <div className="flex-1 lg:mt-10 lg:max-w-md xl:max-w-lg">
+          <FeaturedFounderCard member={founder} />
+        </div>
       </div>
     </section>
   );

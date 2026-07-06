@@ -1,35 +1,60 @@
-import TeamSection from "./team-section";
 import {
-  founder,
   directors,
   managementTeam,
   supervisors,
   admins,
 } from "./team-data";
+import type { TeamTab } from "./constants";
+import TeamSection from "./team-section";
 
-export default function TeamSections() {
+const SECTIONS = [
+  {
+    id: "directors" as const,
+    title: "Directors",
+    members: directors,
+  },
+  {
+    id: "management" as const,
+    title: "Management Team",
+    members: managementTeam,
+  },
+  {
+    id: "supervisors" as const,
+    title: "Supervisors",
+    members: supervisors,
+  },
+  {
+    id: "admins" as const,
+    title: "Admins",
+    members: admins,
+  },
+];
+
+type TeamSectionsProps = {
+  activeTab: TeamTab;
+  onViewAll: (tab: TeamTab) => void;
+};
+
+export default function TeamSections({
+  activeTab,
+  onViewAll,
+}: TeamSectionsProps) {
+  const visibleSections =
+    activeTab === "all"
+      ? SECTIONS
+      : SECTIONS.filter((section) => section.id === activeTab);
+
   return (
-    <section>
-      <div className="container mx-auto px-4">
-        {/* Founder Section */}
+    <div className="space-y-16">
+      {visibleSections.map((section) => (
         <TeamSection
-          title="Founder"
-          members={[founder]}
-          isSingleColumn={true}
+          key={section.id}
+          id={section.id}
+          title={section.title}
+          members={section.members}
+          onViewAll={onViewAll}
         />
-
-        {/* Directors Section */}
-        <TeamSection title="Directors" members={directors} />
-
-        {/* Management Team Section */}
-        <TeamSection title="Management Team" members={managementTeam} />
-
-        {/* Supervisors Section */}
-        <TeamSection title="Supervisors" members={supervisors} />
-
-        {/* Admins Section */}
-        <TeamSection title="Admins" members={admins} />
-      </div>
-    </section>
+      ))}
+    </div>
   );
 }

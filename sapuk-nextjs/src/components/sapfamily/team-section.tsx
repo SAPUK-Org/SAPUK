@@ -1,33 +1,39 @@
-import { TeamMember } from "@/types";
+import { ArrowRight } from "lucide-react";
+import type { TeamMember } from "@/types";
+import type { TeamTab } from "./constants";
 import TeamMemberCard from "./TeamMemberCard";
 
 interface TeamSectionProps {
+  id: TeamTab;
   title: string;
   members: TeamMember[];
-  isSingleColumn?: boolean;
+  onViewAll: (tab: TeamTab) => void;
 }
 
 export default function TeamSection({
+  id,
   title,
   members,
-  isSingleColumn = false,
+  onViewAll,
 }: TeamSectionProps) {
   return (
-    <div className="mb-20">
-      <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
-        {title}
-      </h2>
-      <div
-        className={
-          isSingleColumn
-            ? "flex justify-center max-w-[384px] md:max-w-none mx-auto"
-            : `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-[384px] md:max-w-none mx-auto items-start`
-        }
-      >
+    <section id={`team-${id}`} className="scroll-mt-32">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-2xl font-bold text-zinc-900">{title}</h2>
+        <button
+          type="button"
+          onClick={() => onViewAll(id)}
+          className="inline-flex items-center gap-1 text-sm font-medium text-link hover:text-link/80"
+        >
+          View all {title}
+          <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {members.map((member, index) => (
-          <TeamMemberCard key={index} member={member} />
+          <TeamMemberCard key={`${member.name}-${index}`} member={member} />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

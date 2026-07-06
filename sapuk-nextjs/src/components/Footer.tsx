@@ -139,12 +139,12 @@ export default function Footer() {
           </Link>{" "}
           /{" "}
           <Link
-            href="https://terryward.vercel.app/"
+            href="https://tibbstech.co.uk"
             className={FOOTER_LINK_CLASS}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Lovingly designed & built by Terry Ward
+            Lovingly designed & built by Tibbs Tech
           </Link>
         </p>
         <ul className="flex flex-row items-center justify-center gap-3">

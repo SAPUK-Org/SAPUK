@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { heroContent } from "./suicidology-data";
+import { heroContent } from "./supporting-data";
 
 function HeroIllustration({
   className,
@@ -32,27 +32,26 @@ function HeroIllustration({
   );
 }
 
-export default function SuicidologyHero() {
+export default function SupportingHero() {
   return (
     <header className="relative mb-0">
-      <div className="max-w-6xl space-y-4 pt-12 lg:pr-80 xl:pr-96">
+      <div className="max-w-4xl space-y-4 lg:pr-64 xl:pr-72">
+        <p className="text-sm font-semibold uppercase tracking-wider text-button-blue">
+          {heroContent.label}
+        </p>
         <h1 className="text-3xl font-bold text-zinc-900 sm:text-4xl lg:text-5xl">
           {heroContent.title}
         </h1>
-        <p className="text-base leading-relaxed text-zinc-600 sm:text-lg">
-          {heroContent.subtitle}
+        <hr className="max-w-xs border-0 border-t-2 border-button-blue" />
+        <p className="max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg">
+          {heroContent.intro}
         </p>
-        <div className="rounded-2xl bg-purple-card/20 p-5 sm:p-6">
-          <p className="text-sm leading-relaxed text-zinc-700 sm:text-base">
-            {heroContent.intro}
-          </p>
-        </div>
       </div>
 
       <HeroIllustration
-        className="-mr-4 mt-6 flex justify-end sm:-mr-6 sm:mt-8 lg:absolute lg:-top-6 lg:mr-0 lg:mt-0 lg:right-[calc(-1*((100vw-min(100vw,90rem))/2+2rem))] xl:-top-10"
-        outerClassName="h-52 w-52 sm:h-60 sm:w-60 lg:h-[31.25rem] lg:w-[31.25rem] xl:h-[34rem] xl:w-[34rem]"
-        innerClassName="h-40 w-40 sm:h-44 sm:w-44 lg:h-[23.5rem] lg:w-[23.5rem] xl:h-[26rem] xl:w-[26rem]"
+        className="mt-6 flex justify-end sm:mt-8 lg:absolute lg:-top-3 lg:mr-0 lg:mt-0 lg:-right-10"
+        outerClassName="h-44 w-44 sm:h-52 sm:w-52 lg:h-72 lg:w-72 xl:h-96 xl:w-96"
+        innerClassName="h-36 w-36 sm:h-40 sm:w-40 lg:h-64 lg:w-64 xl:h-80 xl:w-80"
       />
     </header>
   );

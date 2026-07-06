@@ -1,68 +1,67 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+import Image from "next/image";
+import { ArrowRight, User } from "lucide-react";
 import type { TeamMember } from "@/types";
-import Link from "next/link";
+import TeamMemberBioDialog from "./TeamMemberBioDialog";
 
-interface TeamMemberCardProps {
+type TeamMemberCardProps = {
   member: TeamMember;
-}
+};
 
 export default function TeamMemberCard({ member }: TeamMemberCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const MAX_LENGTH = 150; // Characters to show before truncating
-
-  const shouldTruncate = member.bio && member.bio.length > MAX_LENGTH;
-  const displayBio =
-    shouldTruncate && !isExpanded
-      ? `${member.bio?.slice(0, MAX_LENGTH)}...`
-      : member.bio;
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="relative w-full h-72">
-        <Image
-          src={
-            member.image ||
-            "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwKoYcLufdxS9c2GgL1WqeDa7UV6P8pCjQtYof"
-          }
-          alt={member.name}
-          fill
-          className="object-cover transition-all ease-in-out duration-300 hover:scale-105 filter grayscale hover:grayscale-0"
-        />
-      </div>
-      <div className="p-6">
-        {member.name && (
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {member.name}
-          </h3>
-        )}
-        {member.role && <p className="text-indigo-600 mb-2">{member.role}</p>}
-        {member.email && (
-          <Link
-            href={`mailto:${member.email}`}
-            className="text-indigo-600 hover:text-indigo-800 text-sm block mb-2"
-          >
-            {member.email}
-          </Link>
-        )}
-        <div className="text-gray-500 text-sm mb-4">
-          {displayBio}
-          {shouldTruncate && (
+    <>
+      <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md">
+        <div className="relative h-72 w-full shrink-0 bg-purple-card/20">
+          {member.image ? (
+            <Image
+              src={member.image}
+              alt={member.name}
+              fill
+              className="object-cover transition-all duration-300 ease-in-out filter grayscale hover:grayscale-0 hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <User className="h-16 w-16 text-button-blue/40" />
+            </div>
+          )}
+        </div>
+        <div className="flex min-h-[180px] flex-1 flex-col p-5">
+          <h3 className="text-lg font-bold text-zinc-900">{member.name}</h3>
+          {member.role && (
+            <p className="mt-1 text-sm font-medium text-button-blue">
+              {member.role}
+            </p>
+          )}
+          {member.bio ? (
+            <p className="mt-3 line-clamp-3 flex-1 text-sm leading-relaxed text-zinc-600">
+              {member.bio}
+            </p>
+          ) : (
+            <div className="flex-1" />
+          )}
+          {member.bio && (
             <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="ml-1 text-indigo-600 hover:text-indigo-800 font-medium focus:outline-none cursor-pointer"
-              aria-expanded={isExpanded}
+              type="button"
+              onClick={() => setDialogOpen(true)}
+              className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-link hover:text-link/80"
             >
-              {isExpanded ? "Read less" : "Read more"}
+              Read more
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
-        {member.location && (
-          <p className="text-gray-500 text-sm">{member.location}</p>
-        )}
       </div>
-    </div>
+
+      <TeamMemberBioDialog
+        member={member}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
+    </>
   );
 }

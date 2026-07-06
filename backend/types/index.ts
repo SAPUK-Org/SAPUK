@@ -57,6 +57,9 @@ export type Event = {
   created_by: number;
 };
 
+/** Event shape for seed files — id is assigned by the database on insert. */
+export type SeedEvent = Omit<Event, "id"> & { id?: number };
+
 export type CrisisResource = {
   id?: number;
   name: string;
@@ -165,13 +168,14 @@ export type CommunityCause = {
 
 export interface SeedData {
   users: User[];
-  events?: Event[];
+  events?: SeedEvent[];
+  notes?: Omit<Note, "id" | "created_at" | "updated_at">[];
+  note_comments?: Omit<NoteComment, "id" | "created_at">[];
+  crisis_resources?: CrisisResource[];
+  useful_links?: UsefulLink[];
   fundraising_champs?: Omit<
     FundraisingChamp,
     "id" | "created_at" | "updated_at"
   >[];
-  community_causes?: Omit<
-    CommunityCause,
-    "id" | "created_at" | "updated_at"
-  >[];
+  community_causes?: Omit<CommunityCause, "id" | "created_at" | "updated_at">[];
 }

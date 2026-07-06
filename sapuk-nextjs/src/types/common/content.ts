@@ -43,4 +43,5 @@ export type TeamMember = {
   email?: string;
   image?: string;
   bio?: string;
+  handle?: string;
 };

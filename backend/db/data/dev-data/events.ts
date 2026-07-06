@@ -1,6 +1,6 @@
-import { Event } from "../../../types";
+import { SeedEvent } from "../../../types";
 
-export const events: Event[] = [
+export const events: SeedEvent[] = [
   {
     id: 1,
     title: "A Day in the Life - Events Lead",

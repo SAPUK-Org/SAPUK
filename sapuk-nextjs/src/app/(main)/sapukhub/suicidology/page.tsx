@@ -1,22 +1,24 @@
 import SuicidologyHero from "@/components/sapukhub/suicidology/hero";
 import MainContent from "@/components/sapukhub/suicidology/main-content";
 import SuicidologySidebar from "@/components/sapukhub/suicidology/sidebar";
-import StigmaSection from "@/components/sapukhub/suicidology/stigma-section";
 
 const SuicidologyPage = () => {
   return (
-    <section className="px-4 bg-saphub-bg">
-      <div className="max-w-7xl mx-auto px-4 pb-12 pt-20 md:py-20">
-        <SuicidologyHero />
+    <>
+      {/* Pull background into main layout top padding so no page bg shows above hero */}
+      <div className="relative mt-[-100px] w-full overflow-x-clip bg-zinc-100 pt-[100px] sm:mt-[-110px] sm:pt-[110px] md:mt-[-120px] md:pt-[120px]">
+        <div className="mx-auto max-w-360 px-4 pb-12 pt-12 sm:px-6 sm:pt-14 md:pt-16 lg:px-8 lg:pb-16">
+          <SuicidologyHero />
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <section className="bg-white pb-16 relative z-10">
+        <div className="mx-auto grid max-w-360 grid-cols-1 gap-12 pt-12 px-4 sm:px-6 lg:grid-cols-3 lg:px-8 items-center">
           <MainContent />
           <SuicidologySidebar />
         </div>
-
-        <StigmaSection />
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

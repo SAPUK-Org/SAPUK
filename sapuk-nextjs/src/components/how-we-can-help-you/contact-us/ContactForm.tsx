@@ -66,7 +66,7 @@ const IMPORTANT_CONTACTS = [
   },
   { name: "SAP Admin", email: "sapadmin@suicideapuk.co.uk" },
   { name: "Fundraising", email: "fundraising@suicideapuk.co.uk" },
-  { name: "Newsletter", email: "newsletter@suicideapuk.co.uk" },
+  { name: "Newsletter", email: "sapnewsletter@suicideapuk.co.uk" },
   { name: "HR", email: "hr@suicideapuk.co.uk" },
 ] as const;
 

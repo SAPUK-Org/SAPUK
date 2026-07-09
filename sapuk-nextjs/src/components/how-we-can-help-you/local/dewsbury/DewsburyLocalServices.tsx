@@ -1,55 +1,261 @@
-import Link from "next/link";
-import { CalendarDays } from "lucide-react";
+import Image from "next/image";
+import type { ComponentType, ReactNode } from "react";
+import {
+  CalendarDays,
+  Gamepad2,
+  HeartHandshake,
+  Mail,
+  MessageCircleHeart,
+  Monitor,
+  PackageOpen,
+  ShieldCheck,
+  UsersRound,
+} from "lucide-react";
 import { DewsburyGalleryCarousel } from "./DewsburyGalleryCarousel";
+import { DEWSBURY_GALLERY_SLIDES } from "./dewsbury-gallery-data";
 import { DewsburyUpcomingDatesCalendar } from "./DewsburyUpcomingDatesCalendar";
+import {
+  DEWSBURY_RECURRING_SERVICES,
+  type DewsburyAccent,
+  type DewsburyRecurringService,
+} from "./dewsbury-upcoming-events";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const DEWSBURY_EMAIL = "dewsburyoffice@suicideapuk.co.uk";
+const MAILTO = `mailto:${DEWSBURY_EMAIL}`;
+
+const accentStyles: Record<
+  DewsburyAccent,
+  {
+    icon: string;
+    ring: string;
+  }
+> = {
+  blue: {
+    icon: "bg-blue-50 text-blue-600",
+    ring: "ring-blue-100",
+  },
+  green: {
+    icon: "bg-emerald-50 text-emerald-600",
+    ring: "ring-emerald-100",
+  },
+  amber: {
+    icon: "bg-amber-50 text-amber-700",
+    ring: "ring-amber-100",
+  },
+  rose: {
+    icon: "bg-rose-50 text-rose-600",
+    ring: "ring-rose-100",
+  },
+  purple: {
+    icon: "bg-violet-50 text-violet-600",
+    ring: "ring-violet-100",
+  },
+};
+
+const summaryChips = [
+  {
+    title: "Local support",
+    detail: "Kirklees community help",
+    icon: HeartHandshake,
+  },
+  {
+    title: "Safe & inclusive",
+    detail: "Everyone is welcome",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Get involved",
+    detail: "Join in or volunteer",
+    icon: UsersRound,
+  },
+] as const;
+
+const serviceIcons = {
+  shield: ShieldCheck,
+  walk: MessageCircleHeart,
+  games: Gamepad2,
+  pantry: PackageOpen,
+  virtual: Monitor,
+} as const;
+
+function SectionHeading({
+  id,
+  icon: Icon,
+  children,
+}: {
+  id: string;
+  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  children: ReactNode;
+}) {
+  return (
+    <div id={id} className="flex scroll-mt-28 items-center gap-3">
+      <span className="flex size-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+        <Icon className="size-4" aria-hidden />
+      </span>
+      <h2 className="text-lg font-bold text-slate-950">{children}</h2>
+    </div>
+  );
+}
+
+function ContactCard({ compact = false }: { compact?: boolean }) {
+  return (
+    <aside
+      className={cn(
+        "rounded-lg border border-slate-200/80 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)]",
+        compact
+          ? "bg-violet-50/70 shadow-[0_14px_34px_rgba(76,29,149,0.08)]"
+          : "",
+      )}
+    >
+      <h2 className="text-sm font-black text-slate-950">
+        {compact ? "Need help or have a question?" : "Dewsbury at a glance"}
+      </h2>
+      <p className="mt-3 text-xs leading-relaxed text-slate-600">
+        {compact
+          ? "Our Dewsbury team can help you find the right local support or activity."
+          : "Serving Dewsbury and Kirklees with safe spaces, community groups, walks and local support."}
+      </p>
+      <div className="mt-4 flex flex-col gap-3 text-xs text-slate-600">
+        <a
+          href={MAILTO}
+          className="flex min-w-0 items-center gap-2 font-semibold text-violet-700 transition hover:text-violet-900 hover:underline"
+        >
+          <Mail className="size-4 shrink-0" aria-hidden />
+          <span className="truncate">{DEWSBURY_EMAIL}</span>
+        </a>
+        <p className="flex items-center gap-2">
+          <UsersRound className="size-4 shrink-0 text-slate-400" aria-hidden />
+          Everyone welcome
+        </p>
+      </div>
+      <Button
+        asChild
+        className="mt-5 h-10 w-full rounded-lg bg-amber-400 text-xs font-black text-slate-950 shadow-none hover:bg-amber-300"
+      >
+        <a href={MAILTO}>Get in touch</a>
+      </Button>
+    </aside>
+  );
+}
+
+function RecurringServiceCard({
+  service,
+}: {
+  service: DewsburyRecurringService;
+}) {
+  const Icon = serviceIcons[service.icon];
+  const styles = accentStyles[service.accent];
+
+  return (
+    <article className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+      <span
+        className={cn(
+          "mb-4 flex size-11 items-center justify-center rounded-full ring-1",
+          styles.icon,
+          styles.ring,
+        )}
+      >
+        <Icon className="size-5" aria-hidden />
+      </span>
+      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+        {service.category}
+      </p>
+      <h3 className="mt-1 text-base font-black text-slate-950">
+        {service.title}
+      </h3>
+      <p className="mt-2 min-h-[4.5rem] text-sm leading-relaxed text-slate-600">
+        {service.detail}
+      </p>
+      <dl className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 text-xs text-slate-500">
+        <div>
+          <dt className="font-bold text-slate-700">When</dt>
+          <dd>{service.schedule}</dd>
+        </div>
+        <div>
+          <dt className="font-bold text-slate-700">Where</dt>
+          <dd>{service.location}</dd>
+        </div>
+      </dl>
+    </article>
+  );
+}
 
 export default function DewsburyLocalServices() {
+  const heroSlide =
+    DEWSBURY_GALLERY_SLIDES.find((slide) => slide.id === "walk-talk") ??
+    DEWSBURY_GALLERY_SLIDES[0];
+
   return (
-    <article className="space-y-10 md:space-y-12">
-      <header className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm md:p-10">
-        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
-          Local services · Kirklees
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 md:text-4xl">
-          Dewsbury
-        </h1>
-        <p className="mt-4 max-w-3xl text-lg leading-relaxed text-zinc-700">
-          Weekly safe spaces, walks, board games, food pantries, and more —
-          delivered by our Dewsbury volunteer team with SAPUK facilitators.
-        </p>
-        <p className="mt-5 text-sm text-zinc-600">
-          Events can change, so check dates below or our{" "}
-          <Link
-            href="/how-we-can-help-you/projects"
-            className="font-medium text-link hover:underline"
-          >
-            Projects
-          </Link>{" "}
-          page for wider listings.
-        </p>
-      </header>
+    <article id="dewsbury-top" className="flex flex-col gap-8">
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18.5rem] lg:items-start">
+        <div className="relative min-h-[300px] overflow-hidden rounded-lg border border-slate-200/70 bg-white px-6 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-8 lg:px-10 lg:py-9">
+          <div className="relative z-10 max-w-2xl">
+            <h1 className="text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+              Dewsbury
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
+              Weekly safe spaces, walks, board games, food pantries and more —
+              delivered by our Dewsbury volunteer team with SAPUK facilitators.
+            </p>
+          </div>
+
+          <div className="relative z-10 mt-8 grid gap-3 sm:grid-cols-3">
+            {summaryChips.map(({ title, detail, icon: Icon }) => (
+              <div key={title} className="flex items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600 ring-1 ring-violet-100">
+                  <Icon className="size-5" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-xs font-black text-slate-950">{title}</p>
+                  <p className="text-[11px] font-medium text-slate-500">
+                    {detail}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {heroSlide ? (
+            <Image
+              src={heroSlide.src}
+              alt=""
+              width={887}
+              height={444}
+              priority
+              className="pointer-events-none absolute bottom-0 right-0 h-full w-[58%] object-cover object-center opacity-[0.32] [mask-image:linear-gradient(to_right,transparent,black_50%)]"
+            />
+          ) : null}
+        </div>
+
+        <ContactCard />
+      </section>
 
       <DewsburyGalleryCarousel />
 
       <section
-        id="dates-coming-up"
-        className="scroll-mt-24 rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm md:p-8"
+        id="upcoming-dates"
+        className="scroll-mt-28 rounded-lg border border-slate-200/80 bg-slate-50/60 p-4 sm:p-5 lg:p-6"
       >
-        <div className="mb-6 flex items-start gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700">
-            <CalendarDays className="size-5" aria-hidden />
-          </span>
-          <div>
-            <h2 className="text-2xl font-bold text-zinc-900">
-              Dates coming up
-            </h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              Use the calendar to explore each day, or browse the list of
-              confirmed and TBC events.
-            </p>
+        <DewsburyUpcomingDatesCalendar />
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18.5rem] lg:items-start">
+        <div className="min-w-0">
+          <SectionHeading id="regular-groups" icon={CalendarDays}>
+            Regular & recurring
+          </SectionHeading>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {DEWSBURY_RECURRING_SERVICES.map((service) => (
+              <RecurringServiceCard key={service.title} service={service} />
+            ))}
           </div>
         </div>
-        <DewsburyUpcomingDatesCalendar />
+
+        <div className="lg:pt-14">
+          <ContactCard compact />
+        </div>
       </section>
     </article>
   );

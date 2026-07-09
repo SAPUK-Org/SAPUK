@@ -11,7 +11,6 @@ export const dropdownItems: DropdownItem[] = [
         text: "Supporting Someone",
       },
       { href: "/sapukhub/suicidology", text: "Suicidology" },
-      { href: "/sapukhub/newsletter", text: "Newsletter" },
     ],
   },
   {
@@ -83,7 +82,6 @@ export const footerLinkGroups: FooterLinkGroup[] = [
       },
       { href: "/sapukhub/suicidology", label: "Suicidology" },
       { href: "/sapukhub/sapheals", label: "My healing checklist" },
-      { href: "/sapukhub/newsletter", label: "Newsletter" },
     ],
   },
   {
@@ -110,7 +108,6 @@ export const pageTitles: Record<string, string> = {
   "/sapukhub/supporting-suicidal-thoughts": "Supporting Someone",
   "/sapukhub/sapheals": "My Healing Checklist",
   "/sapukhub/suicidology": "Suicidology",
-  "/sapukhub/newsletter": "Newsletter",
   "/sapevolution": "The Beginning",
   "/sapfamily": "The Team",
   "/projects/idkae": "I Don't Know Anybody Either",

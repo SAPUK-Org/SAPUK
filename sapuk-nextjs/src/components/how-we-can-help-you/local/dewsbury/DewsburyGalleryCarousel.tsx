@@ -21,13 +21,12 @@ import {
 import { cn } from "@/lib/utils";
 import { DEWSBURY_GALLERY_SLIDES } from "./dewsbury-gallery-data";
 
-/** Image card width inside the full-width carousel track. */
 const SLIDE_FRAME_CLASS =
-  "mx-auto w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg";
+  "mx-auto w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl";
 
 /** Fixed frame so every slide matches regardless of source image dimensions. */
-const SLIDE_IMAGE_HEIGHT = "h-64 sm:h-72 md:h-80";
-const SLIDE_CAPTION_MIN_HEIGHT = "min-h-[4.5rem]";
+const SLIDE_IMAGE_HEIGHT = "h-64 sm:h-72 md:h-80 lg:h-96";
+const SLIDE_CAPTION_MIN_HEIGHT = "min-h-[4rem]";
 
 /** Embla slide: full track width; overrides default CarouselItem centering. */
 const CAROUSEL_SLIDE_CLASS =
@@ -48,7 +47,7 @@ function GallerySlideFrame({
     <figure
       className={cn(
         SLIDE_FRAME_CLASS,
-        "flex min-w-0 flex-col overflow-hidden rounded-xl border border-zinc-100 bg-zinc-100",
+        "flex min-w-0 flex-col overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.06)]",
       )}
     >
       <button
@@ -57,7 +56,7 @@ function GallerySlideFrame({
         className={cn(
           "group relative block w-full min-w-0 max-w-full shrink-0 overflow-hidden text-left",
           SLIDE_IMAGE_HEIGHT,
-          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2",
+          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2",
         )}
         aria-label={`View full size: ${slide.alt}`}
       >
@@ -73,7 +72,7 @@ function GallerySlideFrame({
           className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/20"
           aria-hidden
         >
-          <span className="flex size-10 items-center justify-center rounded-full bg-white/90 text-zinc-800 opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+          <span className="flex size-10 items-center justify-center rounded-full bg-white/90 text-slate-800 opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
             <ZoomIn className="size-5" />
           </span>
         </span>
@@ -84,7 +83,7 @@ function GallerySlideFrame({
           SLIDE_CAPTION_MIN_HEIGHT,
         )}
       >
-        <p className="line-clamp-2 w-full text-sm leading-snug text-zinc-700">
+        <p className="line-clamp-2 w-full text-sm leading-snug text-slate-600">
           {slide.caption}
         </p>
       </figcaption>
@@ -167,18 +166,18 @@ export function DewsburyGalleryCarousel() {
   return (
     <section
       aria-label="Photos from Dewsbury programmes"
-      className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm"
+      className="overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]"
     >
-      <div className="border-b border-zinc-100 px-5 py-4 md:px-6">
-        <h2 className="text-lg font-semibold text-zinc-900">
+      <div className="border-b border-slate-100 px-5 py-4 md:px-6">
+        <h2 className="text-lg font-bold text-slate-950">
           Community in Dewsbury
         </h2>
-        <p className="mt-1 text-sm text-zinc-600">
+        <p className="mt-1 text-sm text-slate-600">
           A glimpse of our local programmes — tap a photo to view full size.
         </p>
       </div>
 
-      <div className="relative w-full min-w-0 px-3 py-4 sm:px-12 sm:py-6">
+      <div className="relative w-full min-w-0 bg-slate-50/60 px-3 py-4 sm:px-12 sm:py-6">
         <div className="w-full min-w-0 overflow-hidden">
           <Carousel
             setApi={setApi}
@@ -199,8 +198,8 @@ export function DewsburyGalleryCarousel() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="left-1 top-[38%] -translate-y-1/2 sm:left-3" />
-            <CarouselNext className="right-1 top-[38%] -translate-y-1/2 sm:right-3" />
+            <CarouselPrevious className="left-1 top-[42%] -translate-y-1/2 border-slate-200 bg-white text-slate-700 shadow-md hover:bg-violet-50 hover:text-violet-700 sm:left-3" />
+            <CarouselNext className="right-1 top-[42%] -translate-y-1/2 border-slate-200 bg-white text-slate-700 shadow-md hover:bg-violet-50 hover:text-violet-700 sm:right-3" />
           </Carousel>
         </div>
 
@@ -217,8 +216,8 @@ export function DewsburyGalleryCarousel() {
               onClick={() => api?.scrollTo(index)}
               className={`h-2 rounded-full transition-all ${
                 current === index + 1
-                  ? "w-6 bg-zinc-800"
-                  : "w-2 bg-zinc-300 hover:bg-zinc-400"
+                  ? "w-6 bg-violet-500"
+                  : "w-2 bg-slate-300 hover:bg-slate-400"
               }`}
             />
           ))}

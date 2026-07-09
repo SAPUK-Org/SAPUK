@@ -46,7 +46,7 @@ const SocialMediaLinks = () => (
 const DonateButton = () => (
   <Link
     href="/donate"
-    className="flex items-center justify-center gap-4 text-sm md:text-base font-bold bg-yellow-400 hover:bg-yellow-500 text-zinc-800 hover:text-zinc-900 py-[5px] px-12"
+    className="flex items-center justify-center gap-4 text-sm md:text-base font-bold bg-yellow-400 hover:bg-yellow-500 text-zinc-800 hover:text-zinc-900 py-[5px] px-6 md:px-12"
   >
     <HandHeart size={20} weight="Filled" className="shrink-0" />
     <span>Donate</span>

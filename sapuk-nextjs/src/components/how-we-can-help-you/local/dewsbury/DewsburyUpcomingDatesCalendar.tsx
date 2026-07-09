@@ -1,195 +1,391 @@
 "use client";
 
-import { useCallback, useMemo, type ReactNode } from "react";
-import { format, isSameDay } from "date-fns";
+import { useMemo, useState } from "react";
 import {
-  MorphCalendar,
-  type MorphCalendarDayData,
-  type MorphCalendarEvent,
-} from "@/components/ui/morph-calendar";
+  addMonths,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isSameDay,
+  isSameMonth,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+} from "date-fns";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  MapPin,
+} from "lucide-react";
 import {
   DEWSBURY_SCHEDULED_EVENTS,
-  DEWSBURY_TBC_EVENTS,
+  type DewsburyAccent,
+  type DewsburyScheduledEvent,
 } from "./dewsbury-upcoming-events";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const eventCardClass =
-  "flex h-full w-full flex-col overflow-hidden border-zinc-200/90 bg-white shadow-sm transition-shadow hover:shadow-md";
+const accentStyles: Record<
+  DewsburyAccent,
+  {
+    badge: string;
+    rail: string;
+    day: string;
+    dot: string;
+  }
+> = {
+  blue: {
+    badge: "bg-blue-50 text-blue-700 ring-blue-100",
+    rail: "bg-blue-50 text-blue-900",
+    day: "bg-blue-100 text-blue-800",
+    dot: "bg-blue-500",
+  },
+  green: {
+    badge: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    rail: "bg-emerald-50 text-emerald-900",
+    day: "bg-emerald-100 text-emerald-800",
+    dot: "bg-emerald-500",
+  },
+  amber: {
+    badge: "bg-amber-50 text-amber-700 ring-amber-100",
+    rail: "bg-amber-50 text-amber-900",
+    day: "bg-amber-100 text-amber-800",
+    dot: "bg-amber-500",
+  },
+  rose: {
+    badge: "bg-rose-50 text-rose-700 ring-rose-100",
+    rail: "bg-rose-50 text-rose-900",
+    day: "bg-rose-100 text-rose-800",
+    dot: "bg-rose-500",
+  },
+  purple: {
+    badge: "bg-violet-50 text-violet-700 ring-violet-100",
+    rail: "bg-violet-50 text-violet-900",
+    day: "bg-violet-100 text-violet-800",
+    dot: "bg-violet-500",
+  },
+};
 
-function EventGrid({ children }: { children: React.ReactNode }) {
-  return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-      {children}
-    </ul>
-  );
+const allSortedEvents = [...DEWSBURY_SCHEDULED_EVENTS].sort(
+  (a, b) => a.date.getTime() - b.date.getTime(),
+);
+
+function getEventKey(event: DewsburyScheduledEvent) {
+  return `${event.title}-${event.date.toISOString()}`;
 }
 
-function ScheduledEventCard({
-  event,
-}: {
-  event: (typeof DEWSBURY_SCHEDULED_EVENTS)[number];
-}) {
-  return (
-    <li className="flex min-h-46">
-      <Card className={eventCardClass}>
-        <CardHeader className="shrink-0 space-y-1 border-b border-zinc-100 bg-zinc-50/80 px-5 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            {format(event.date, "EEEE")}
-          </p>
-          <CardTitle className="text-base font-semibold leading-snug text-zinc-900">
-            {format(event.date, "d MMMM yyyy")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col px-5 pb-5 pt-4">
-          <p className="font-semibold leading-snug text-zinc-900">{event.title}</p>
-          <p className="mt-2 text-sm text-zinc-600">{event.time}</p>
-          {event.note ? (
-            <p className="mt-auto border-t border-zinc-100 pt-3 text-sm leading-relaxed text-zinc-500">
-              {event.note}
-            </p>
-          ) : (
-            <span className="mt-auto block min-h-px" aria-hidden />
-          )}
-        </CardContent>
-      </Card>
-    </li>
-  );
+function getEventsOnDay(events: DewsburyScheduledEvent[], date: Date) {
+  return events.filter((event) => isSameDay(event.date, date));
 }
 
-function TbcEventCard({ event }: { event: (typeof DEWSBURY_TBC_EVENTS)[number] }) {
+function EventCard({ event }: { event: DewsburyScheduledEvent }) {
+  const styles = accentStyles[event.accent];
+
   return (
-    <li className="flex min-h-46">
-      <Card
+    <article className="grid min-h-[154px] grid-cols-[4.75rem_1fr] overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+      <time
+        dateTime={format(event.date, "yyyy-MM-dd")}
         className={cn(
-          eventCardClass,
-          "border-dashed bg-zinc-50/50",
+          "flex flex-col items-center justify-start gap-1 border-r border-slate-100 px-2 py-4 text-center",
+          styles.rail,
         )}
       >
-        <CardHeader className="shrink-0 space-y-1 border-b border-zinc-200/80 bg-zinc-100/60 px-5 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            To be confirmed
-          </p>
-          <CardTitle className="text-base font-semibold leading-snug text-zinc-900">
+        <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+          {format(event.date, "EEE")}
+        </span>
+        <span className="text-2xl font-black leading-none">
+          {format(event.date, "d")}
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+          {format(event.date, "MMM")}
+        </span>
+      </time>
+
+      <div className="flex min-w-0 flex-col gap-2 px-4 py-4">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-sm font-bold leading-tight text-slate-950">
             {event.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col justify-center px-5 pb-5 pt-4">
-          <p className="text-sm leading-relaxed text-zinc-600">{event.detail}</p>
-        </CardContent>
-      </Card>
-    </li>
+          </h3>
+          <span
+            className={cn(
+              "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1",
+              styles.badge,
+            )}
+          >
+            {event.category}
+          </span>
+        </div>
+        <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+          <MapPin className="size-3.5 shrink-0" aria-hidden />
+          <span className="truncate">{event.location}</span>
+        </p>
+        <p className="line-clamp-2 text-xs leading-relaxed text-slate-600">
+          {event.summary}
+        </p>
+        <p className="mt-auto flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+          <Clock3 className="size-3.5 shrink-0" aria-hidden />
+          {event.time}
+        </p>
+      </div>
+    </article>
   );
 }
 
-function eventsOnDay(date: Date) {
-  return DEWSBURY_SCHEDULED_EVENTS.filter((event) =>
-    isSameDay(event.date, date),
+function EmptyUpcomingDates() {
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+      <div className="rounded-lg border border-dashed border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+        <div className="flex items-start gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+            <CalendarDays className="size-5" aria-hidden />
+          </span>
+          <div>
+            <h2 className="text-lg font-bold text-slate-950">
+              Upcoming dates
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+              There are no future Dewsbury dates listed right now. Regular
+              programmes and coming-soon support are shown below, and new dates
+              can be added here when they are confirmed.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <aside className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+          Next dates
+        </p>
+        <p className="mt-2 text-sm font-bold text-slate-950">
+          To be confirmed
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-slate-500">
+          Check back soon or contact the Dewsbury team for the latest local
+          programme information.
+        </p>
+      </aside>
+    </div>
   );
 }
 
-function toMorphEvent(
-  event: (typeof DEWSBURY_SCHEDULED_EVENTS)[number],
-): MorphCalendarEvent {
-  const titleLower = event.title.toLowerCase();
-  let type: MorphCalendarEvent["type"] = "meeting";
-  if (titleLower.includes("walk")) type = "focus";
-  else if (titleLower.includes("board game")) type = "task";
-  else if (titleLower.includes("stall")) type = "reminder";
+function CompactMonthCalendar({
+  currentMonth,
+  selectedDate,
+  events,
+  minMonth,
+  maxMonth,
+  onMonthChange,
+  onSelectDate,
+}: {
+  currentMonth: Date;
+  selectedDate: Date;
+  events: DewsburyScheduledEvent[];
+  minMonth: Date;
+  maxMonth: Date;
+  onMonthChange: (date: Date) => void;
+  onSelectDate: (date: Date) => void;
+}) {
+  const days = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    return eachDayOfInterval({
+      start: startOfWeek(monthStart, { weekStartsOn: 1 }),
+      end: endOfWeek(endOfMonth(monthStart), { weekStartsOn: 1 }),
+    });
+  }, [currentMonth]);
 
-  return {
-    id: `${event.title}-${event.date.toISOString()}`,
-    title: event.title,
-    time: event.time,
-    type,
-  };
+  const canGoPrevious = currentMonth.getTime() > minMonth.getTime();
+  const canGoNext = currentMonth.getTime() < maxMonth.getTime();
+  const monthEvents = events.filter((event) =>
+    isSameMonth(event.date, currentMonth),
+  );
+
+  return (
+    <aside className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
+      <div className="mb-4 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => canGoPrevious && onMonthChange(subMonths(currentMonth, 1))}
+          disabled={!canGoPrevious}
+          className="flex size-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
+          aria-label="Show previous month"
+        >
+          <ChevronLeft className="size-4" aria-hidden />
+        </button>
+        <h3 className="text-sm font-bold text-slate-950">
+          {format(currentMonth, "MMMM yyyy")}
+        </h3>
+        <button
+          type="button"
+          onClick={() => canGoNext && onMonthChange(addMonths(currentMonth, 1))}
+          disabled={!canGoNext}
+          className="flex size-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
+          aria-label="Show next month"
+        >
+          <ChevronRight className="size-4" aria-hidden />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wide text-slate-400">
+        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+          <span key={day}>{day}</span>
+        ))}
+      </div>
+
+      <div className="mt-2 grid grid-cols-7 gap-1">
+        {days.map((date) => {
+          const dayEvents = getEventsOnDay(events, date);
+          const primaryEvent = dayEvents[0];
+          const selected = isSameDay(date, selectedDate);
+          const inMonth = isSameMonth(date, currentMonth);
+
+          return (
+            <button
+              key={date.toISOString()}
+              type="button"
+              onClick={() => {
+                if (inMonth) onSelectDate(date);
+              }}
+              disabled={!inMonth}
+              className={cn(
+                "relative flex aspect-square items-center justify-center rounded-full text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2",
+                inMonth ? "text-slate-600 hover:bg-slate-100" : "text-slate-300",
+                primaryEvent ? accentStyles[primaryEvent.accent].day : "",
+                selected ? "bg-violet-600 text-white hover:bg-violet-600" : "",
+              )}
+              aria-label={`${format(date, "d MMMM yyyy")}${
+                dayEvents.length ? `, ${dayEvents.length} event` : ""
+              }`}
+            >
+              {format(date, "d")}
+              {dayEvents.length > 0 && !selected ? (
+                <span
+                  className={cn(
+                    "absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full",
+                    accentStyles[primaryEvent.accent].dot,
+                  )}
+                  aria-hidden
+                />
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-4 text-xs font-medium text-slate-500">
+        <span className="size-2 rounded-full bg-violet-500" aria-hidden />
+        {monthEvents.length} {monthEvents.length === 1 ? "event" : "events"} this
+        month
+      </div>
+    </aside>
+  );
 }
 
 export function DewsburyUpcomingDatesCalendar() {
-  const defaultMonth = useMemo(
-    () => DEWSBURY_SCHEDULED_EVENTS[0]?.date ?? new Date(),
-    [],
-  );
-
-  const fromYear = useMemo(
-    () =>
-      Math.min(...DEWSBURY_SCHEDULED_EVENTS.map((e) => e.date.getFullYear())),
-    [],
-  );
-
-  const toYear = useMemo(
-    () =>
-      Math.max(...DEWSBURY_SCHEDULED_EVENTS.map((e) => e.date.getFullYear())),
-    [],
-  );
-
-  const getDayData = useCallback((date: Date): MorphCalendarDayData => {
-    const dayEvents = eventsOnDay(date);
-
-    const notes =
-      dayEvents.length === 0
-        ? "No SAPUK Dewsbury events on this day. Choose a date with activity dots, or see all upcoming dates listed below."
-        : dayEvents
-            .map((e) => [e.title, e.time, e.note].filter(Boolean).join(" · "))
-            .join("\n");
-
-    return {
-      events: dayEvents.map(toMorphEvent),
-      notes,
-    };
+  const upcomingEvents = useMemo(() => {
+    const today = startOfDay(new Date());
+    return allSortedEvents.filter((event) => event.date >= today);
   }, []);
+  const firstEvent = upcomingEvents[0];
+  const lastEvent = upcomingEvents[upcomingEvents.length - 1];
+  const minMonth = startOfMonth(firstEvent?.date ?? new Date());
+  const maxMonth = startOfMonth(lastEvent?.date ?? new Date());
 
-  const getActivityLevel = useCallback((date: Date): number => {
-    const count = eventsOnDay(date).length;
-    if (count === 0) return 0;
-    return Math.min(count, 4);
-  }, []);
+  const [currentMonth, setCurrentMonth] = useState(minMonth);
+  const [selectedDate, setSelectedDate] = useState(firstEvent?.date ?? new Date());
+  const [showAll, setShowAll] = useState(false);
+
+  if (upcomingEvents.length === 0) {
+    return <EmptyUpcomingDates />;
+  }
+
+  const visibleEvents = showAll ? upcomingEvents : upcomingEvents.slice(0, 6);
+  const selectedEvents = getEventsOnDay(upcomingEvents, selectedDate);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="mx-auto w-full max-w-md">
-        <MorphCalendar
-          getDayData={getDayData}
-          getActivityLevel={getActivityLevel}
-          defaultMonth={defaultMonth}
-          fromYear={fromYear}
-          toYear={toYear}
-          className="border-zinc-200 shadow-md"
-        />
-        <p className="mt-3 text-center text-xs text-zinc-500">
-          Activity dots mark days with an event. Tap a date to open details.
-        </p>
-      </div>
-
-      <div className="w-full space-y-10">
-        <div>
-          <h3 className="mb-4 text-lg font-semibold text-zinc-900">
-            All upcoming dates
-          </h3>
-          <EventGrid>
-            {[...DEWSBURY_SCHEDULED_EVENTS]
-              .sort((a, b) => a.date.getTime() - b.date.getTime())
-              .map((event) => (
-                <ScheduledEventCard
-                  key={`${event.title}-${event.date.toISOString()}`}
-                  event={event}
-                />
-              ))}
-          </EventGrid>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+      <div className="min-w-0">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+              <CalendarDays className="size-4" aria-hidden />
+            </span>
+            <h2 className="text-lg font-bold text-slate-950">Upcoming dates</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCurrentMonth(startOfMonth(selectedDate))}
+            className="text-xs font-bold text-violet-600 transition hover:text-violet-800 hover:underline"
+          >
+            View selected in calendar
+          </button>
         </div>
 
-        {DEWSBURY_TBC_EVENTS.length > 0 ? (
-          <div>
-            <h3 className="mb-4 text-lg font-semibold text-zinc-900">
-              To be confirmed
-            </h3>
-            <EventGrid>
-              {DEWSBURY_TBC_EVENTS.map((event) => (
-                <TbcEventCard key={event.title} event={event} />
-              ))}
-            </EventGrid>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {visibleEvents.map((event) => (
+            <button
+              key={getEventKey(event)}
+              type="button"
+              onClick={() => {
+                setSelectedDate(event.date);
+                setCurrentMonth(startOfMonth(event.date));
+              }}
+              className="block min-w-0 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2"
+            >
+              <EventCard event={event} />
+            </button>
+          ))}
+        </div>
+
+        {upcomingEvents.length > 6 ? (
+          <div className="mt-5 flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAll((value) => !value)}
+              className="rounded-lg border-slate-200 bg-white px-4 text-xs font-bold text-violet-600 shadow-sm hover:bg-violet-50 hover:text-violet-700"
+            >
+              {showAll ? "Show fewer dates" : "See all upcoming dates"}
+              <ChevronRight className="size-3.5" aria-hidden />
+            </Button>
           </div>
         ) : null}
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <CompactMonthCalendar
+          currentMonth={currentMonth}
+          selectedDate={selectedDate}
+          events={upcomingEvents}
+          minMonth={minMonth}
+          maxMonth={maxMonth}
+          onMonthChange={setCurrentMonth}
+          onSelectDate={setSelectedDate}
+        />
+
+        <div
+          className="rounded-lg border border-slate-200/80 bg-white p-4 text-sm shadow-[0_12px_30px_rgba(15,23,42,0.04)]"
+          aria-live="polite"
+        >
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+            Selected date
+          </p>
+          <p className="mt-1 font-bold text-slate-950">
+            {format(selectedDate, "d MMMM yyyy")}
+          </p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {selectedEvents.map((event) => (
+              <li key={getEventKey(event)} className="text-xs text-slate-600">
+                <span className="font-bold text-slate-800">{event.title}</span>{" "}
+                · {event.time}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

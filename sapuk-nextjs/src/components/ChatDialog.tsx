@@ -110,7 +110,7 @@ export function ChatDialog({ isOpen, setIsOpen }: ChatDialogProps) {
                 <p className="mt-2">Volunteer:</p>
                 <p className="font-semibold">volunteer@suicideapuk.co.uk</p>
                 <p className="mt-2">News / press:</p>
-                <p className="font-semibold">newsletter@suicideapuk.co.uk</p>
+                <p className="font-semibold">sapnewsletter@suicideapuk.co.uk</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Please allow up to 48 hours for a response via email.
                 </p>

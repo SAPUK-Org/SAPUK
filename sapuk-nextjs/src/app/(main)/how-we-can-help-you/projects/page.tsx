@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import type { Event } from "@/components/dashboard/events/types";
 import { eventEarliestStart } from "@/components/dashboard/events/events-utils";
 import LocalServicesBanner from "@/components/how-we-can-help-you/local/LocalServicesBanner";
-import ProjectEventsList from "@/components/projects/ProjectEventsList";
+import ProjectsGrid from "@/components/projects/ProjectsGrid";
+import ProjectsHero from "@/components/projects/ProjectsHero";
+import VolunteerCta from "@/components/projects/VolunteerCta";
 
 function sortEventsByStart(list: Event[]) {
   return [...list].sort((a, b) => {
@@ -58,22 +60,24 @@ export default function ProjectsPage() {
   const sortedEvents = useMemo(() => sortEventsByStart(events), [events]);
 
   return (
-    <section className="px-4 py-12 md:py-16">
-      <div className="container mx-auto max-w-3xl">
+    <section className="bg-saphub-bg px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 lg:gap-12">
         <LocalServicesBanner />
-        {eventsLoading ? (
-          <p className="text-sm text-zinc-400">Loading events…</p>
-        ) : null}
+        <ProjectsHero />
+
         {eventsError ? (
-          <p className="text-sm text-amber-500/90">{eventsError}</p>
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {eventsError}
+          </p>
         ) : null}
 
-        {!eventsLoading && !eventsError ? (
-          <ProjectEventsList
-            events={sortedEvents}
-            emptyLabel="No public events are scheduled right now."
-          />
-        ) : null}
+        <ProjectsGrid
+          events={sortedEvents}
+          loading={eventsLoading}
+          emptyLabel="No public events are scheduled right now."
+        />
+
+        <VolunteerCta />
       </div>
     </section>
   );

@@ -109,7 +109,7 @@ type EventProjectMediaProps = {
 /**
  * Renders `external_links` (web / TikTok) and `studio_partners` for the public
  * projects page. Image-type links are merged into the gallery carousel in
- * `ProjectEventsList` (`unifiedGallerySlides`).
+ * `ProjectDetailsDialog` (`unifiedEventGalleryImages`).
  */
 export function EventProjectMedia({ event }: EventProjectMediaProps) {
   const links = event.external_links ?? [];

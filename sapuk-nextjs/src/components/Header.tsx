@@ -6,6 +6,7 @@ import { SocialIcon } from "react-social-icons";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { dropdownItems } from "@/lib/navigation";
 import { useScroll, useDropdown, useActivePath } from "@/hooks";
+import { HandHeart } from "reicon-react";
 
 const SocialMediaLinks = () => (
   <div className="flex flex-row justify-center items-center gap-2 sm:gap-4">
@@ -45,9 +46,10 @@ const SocialMediaLinks = () => (
 const DonateButton = () => (
   <Link
     href="/donate"
-    className="text-sm md:text-base font-bold text-yellow-200 hover:text-yellow-300"
+    className="flex items-center justify-center gap-4 text-sm md:text-base font-bold bg-yellow-400 hover:bg-yellow-500 text-zinc-800 hover:text-zinc-900 py-[5px] px-12"
   >
-    Donate
+    <HandHeart size={20} weight="Filled" className="shrink-0" />
+    <span>Donate</span>
   </Link>
 );
 

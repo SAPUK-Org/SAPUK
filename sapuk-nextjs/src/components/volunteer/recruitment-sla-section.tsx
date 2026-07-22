@@ -1,7 +1,10 @@
-import Image from "next/image";
+import EnlargeableImage from "@/components/EnlargeableImage";
 
 const RECRUITMENT_SLA_POSTER_SRC =
   "https://bi4a1aeb4i.ufs.sh/f/akEZKbpzclMNYmkEzborWUh5ZuXr2yx8FazDCjcLqM3ONlvn";
+
+const RECRUITMENT_SLA_ALT =
+  "SAPUK volunteer recruitment SLA — response times and commitments to prospective volunteers";
 
 export default function RecruitmentSlaSection() {
   return (
@@ -28,12 +31,15 @@ export default function RecruitmentSlaSection() {
       </div>
 
       <div className="flex justify-center">
-        <Image
+        <EnlargeableImage
           src={RECRUITMENT_SLA_POSTER_SRC}
-          alt="SAPUK volunteer recruitment SLA — response times and commitments to prospective volunteers"
+          alt={RECRUITMENT_SLA_ALT}
           width={400}
           height={560}
-          className="w-full max-w-[400px] rounded-md border border-zinc-200 mx-auto lg:mx-0 pointer-events-none select-none"
+          className="w-full max-w-[400px]"
+          enlargeLabel="Enlarge recruitment SLA poster"
+          dialogTitle="Recruitment SLA poster"
+          dialogDescription="Enlarged view of the volunteer recruitment service level agreement. Scroll if the image is taller than the screen."
         />
       </div>
     </div>

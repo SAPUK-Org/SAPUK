@@ -22,7 +22,7 @@ export default async function FundraisingChampsPreview() {
         </div>
         <Link
           href="/fundraise/champs"
-          className="text-blue-600 font-medium hover:underline shrink-0"
+          className="text-violet-700 font-medium hover:underline shrink-0"
         >
           View all champs →
         </Link>

@@ -93,7 +93,7 @@ export default function ProjectCard({
 
         <Button
           type="button"
-          className="mt-auto self-end w-fit bg-button-blue text-white hover:bg-button-blue/90"
+          className="mt-auto self-end w-fit bg-violet-600 text-white hover:bg-violet-500"
           onClick={() => onViewDetails(event)}
         >
           View details

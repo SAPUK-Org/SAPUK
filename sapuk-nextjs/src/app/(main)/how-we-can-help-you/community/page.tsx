@@ -77,7 +77,7 @@ function ShareCard() {
       </div>
       <Button
         asChild
-        className="mt-auto h-10 w-full rounded-lg bg-amber-400 text-xs font-black text-slate-950 shadow-none hover:bg-amber-300"
+        className="mt-auto h-10 w-full rounded-lg bg-violet-600 text-xs font-black text-white shadow-none hover:bg-violet-500"
       >
         <a href={`mailto:${COMMUNITY_EMAIL}`}>Send a community feature</a>
       </Button>
@@ -162,7 +162,7 @@ function CommunityFeatures({ causes }: { causes: CommunityCause[] }) {
           </p>
           <Button
             asChild
-            className="mt-5 h-10 rounded-lg bg-amber-400 px-5 text-xs font-black text-slate-950 shadow-none hover:bg-amber-300"
+            className="mt-5 h-10 rounded-lg bg-violet-600 px-5 text-xs font-black text-white shadow-none hover:bg-violet-500"
           >
             <a href={`mailto:${COMMUNITY_EMAIL}`}>Send a feature</a>
           </Button>

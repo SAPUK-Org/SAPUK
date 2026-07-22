@@ -58,7 +58,7 @@ export default function GuidanceContent() {
                 className={cn(
                   "inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition-colors",
                   link.variant === "primary"
-                    ? "bg-zinc-900 text-white hover:bg-zinc-800"
+                    ? "bg-violet-600 text-white hover:bg-violet-500"
                     : "border border-zinc-200 bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
                 )}
               >

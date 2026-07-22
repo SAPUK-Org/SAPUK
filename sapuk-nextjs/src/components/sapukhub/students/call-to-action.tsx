@@ -15,7 +15,7 @@ export default function CallToAction() {
       <div className="flex items-center justify-center gap-4">
         <Button
           asChild
-          className="w-fit bg-button-blue text-white font-semibold hover:bg-button-blue/80 hover:text-white"
+          className="w-fit bg-violet-600 text-white font-semibold hover:bg-violet-500 hover:text-white"
         >
           <Link href="/sapservices/thesapchat">Start a Chat</Link>
         </Button>

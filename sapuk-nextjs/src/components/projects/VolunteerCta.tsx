@@ -24,7 +24,7 @@ export default function VolunteerCta() {
 
         <Button
           asChild
-          className="w-full shrink-0 border-button-blue bg-button-blue text-white hover:bg-button-blue/80 sm:w-auto"
+          className="w-full shrink-0 border-violet-600 bg-violet-600 text-white hover:bg-violet-500 sm:w-auto"
         >
           <Link href="/volunteer">
             Explore volunteering opportunities

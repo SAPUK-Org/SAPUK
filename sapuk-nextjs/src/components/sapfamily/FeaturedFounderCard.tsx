@@ -43,7 +43,7 @@ export default function FeaturedFounderCard({ member }: FeaturedFounderCardProps
           <button
             type="button"
             onClick={() => setDialogOpen(true)}
-            className="mt-2 inline-flex w-fit items-center gap-1 rounded-lg bg-button-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-button-blue/90"
+            className="mt-2 inline-flex w-fit items-center gap-1 rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-500"
           >
             Read bio
             <ArrowRight className="h-4 w-4" />

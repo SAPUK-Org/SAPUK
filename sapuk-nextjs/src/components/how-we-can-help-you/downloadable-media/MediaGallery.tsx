@@ -22,7 +22,7 @@ export default function MediaGallery() {
             href={item.src}
             download={item.downloadName}
             target="_blank"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-full inline-block transition-colors text-sm"
+            className="bg-violet-600 hover:bg-violet-500 text-white font-medium py-2 px-4 rounded-full inline-block transition-colors text-sm"
           >
             Download
           </Link>

@@ -34,7 +34,7 @@ export default function ResourcesSection() {
                 </p>
                 <Button
                   asChild
-                  className="w-fit bg-button-blue text-white font-semibold hover:bg-button-blue/80 hover:text-white"
+                  className="w-fit bg-violet-600 text-white font-semibold hover:bg-violet-500 hover:text-white"
                 >
                   <Link
                     href={resource.href}

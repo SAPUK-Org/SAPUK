@@ -360,7 +360,7 @@ export default function SafeSpacesPage() {
               </div>
               <Button
                 asChild
-                className="mt-auto h-10 w-full rounded-lg bg-amber-400 text-xs font-black text-slate-950 shadow-none hover:bg-amber-300"
+                className="mt-auto h-10 w-full rounded-lg bg-violet-600 text-xs font-black text-white shadow-none hover:bg-violet-500"
               >
                 <a href={`mailto:${VIRTUAL_CONTACTS.general.email}`}>
                   Get in touch

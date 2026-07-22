@@ -95,7 +95,7 @@ export default function NewsletterSignupForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-11 rounded-lg bg-amber-400 px-5 text-xs font-black text-slate-950 shadow-none hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
+          className="h-11 rounded-lg bg-violet-600 px-5 text-xs font-black text-white shadow-none hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting ? "Subscribing..." : "Subscribe"}
         </Button>

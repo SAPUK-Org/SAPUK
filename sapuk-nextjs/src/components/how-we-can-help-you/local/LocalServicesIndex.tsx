@@ -195,7 +195,7 @@ export default function LocalServicesIndex() {
               </p>
               <Button
                 asChild
-                className="mt-5 h-10 w-full rounded-lg bg-amber-400 text-xs font-black text-slate-950 shadow-none hover:bg-amber-300"
+                className="mt-5 h-10 w-full rounded-lg bg-violet-600 text-xs font-black text-white shadow-none hover:bg-violet-500"
               >
                 <a href="#local-areas">View areas</a>
               </Button>

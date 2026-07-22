@@ -11,7 +11,7 @@ export default function CustomMaterialsCta() {
       </p>
       <Link
         href="mailto:media@suicideapuk.co.uk"
-        className="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-full inline-block transition-colors"
+        className="bg-violet-600 text-white hover:bg-violet-500 font-bold py-3 px-8 rounded-full inline-block transition-colors"
       >
         Request Custom Materials
       </Link>

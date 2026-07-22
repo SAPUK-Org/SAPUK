@@ -11,11 +11,10 @@ export default function ContactCTA() {
         support you.
       </p>
       <Button
-        variant="contact"
         onClick={() => {
           window.location.href = "mailto:fundraising@suicideapuk.co.uk";
         }}
-        className="cursor-pointer"
+        className="h-auto cursor-pointer rounded-full bg-violet-600 px-10 py-4 text-sm font-bold text-white shadow-none hover:bg-violet-500"
       >
         Contact Us
       </Button>

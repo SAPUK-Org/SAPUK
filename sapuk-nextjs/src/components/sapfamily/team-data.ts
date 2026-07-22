@@ -4,7 +4,6 @@ export const founder: TeamMember = {
   name: "Dan",
   location: "Preston, Lancashire",
   role: "Founder",
-  handle: "@dan_tilly",
   image:
     "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwj5wa9qU2sga69fPjWHmSeMVYkrxd0nlhZt3p",
   bio: "Hey, I am Danielle (Dan), and I am the founder of SAPUK...",

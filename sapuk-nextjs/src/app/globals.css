@@ -3,6 +3,7 @@
   src: url("../assets/fonts/FuzzyBubbles-Regular.ttf");
 }
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 @import "uploadthing/tw/v4";
 @source "../../node_modules/@uploadthing/react/dist";
 

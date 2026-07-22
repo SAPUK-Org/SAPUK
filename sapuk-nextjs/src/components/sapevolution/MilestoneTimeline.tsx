@@ -52,14 +52,21 @@ function MilestoneCard({
         <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-violet-200 bg-violet-50 text-violet-700">
           <Icon className="size-5" aria-hidden />
         </span>
-        <div className="min-w-0 space-y-2">
+        <div className="min-w-0 space-y-3">
           <p className="text-sm font-bold text-violet-700">{item.year}</p>
           <h3 className="text-lg font-bold text-slate-950 sm:text-xl">
             {item.title}
           </h3>
-          <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
-            {item.content}
-          </p>
+          <div className="space-y-3">
+            {item.content.map((paragraph, index) => (
+              <p
+                key={`${item.id}-${index}`}
+                className="text-sm leading-relaxed text-slate-600 sm:text-base"
+              >
+                {paragraph}
+              </p>
+            ))}
+          </div>
         </div>
       </div>
     </article>

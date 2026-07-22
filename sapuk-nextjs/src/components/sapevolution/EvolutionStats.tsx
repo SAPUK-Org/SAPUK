@@ -1,11 +1,17 @@
-import { Heart, Home, MessageCircle, Users, type LucideIcon } from "lucide-react";
+import {
+  Clock,
+  Heart,
+  MessageCircle,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { evolutionStats, type EvolutionStat } from "./timeline-data";
 
 const STAT_ICONS: Record<EvolutionStat["icon"], LucideIcon> = {
   users: Users,
   messages: MessageCircle,
   heart: Heart,
-  home: Home,
+  clock: Clock,
 };
 
 export default function EvolutionStats() {

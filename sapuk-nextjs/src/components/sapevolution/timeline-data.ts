@@ -1,37 +1,151 @@
-export interface TimelineItem {
-  id: number;
+export type MilestoneCategory = "growth" | "impact" | "moments";
+
+export type MilestoneFilter = "all" | MilestoneCategory;
+
+export type MilestoneIcon =
+  | "sprout"
+  | "megaphone"
+  | "users"
+  | "message-circle"
+  | "heart"
+  | "home"
+  | "star";
+
+export interface TimelineMilestone {
+  id: string;
+  year: string;
   title: string;
   content: string;
-  imageUrl: string;
-  imageAlt: string;
+  category: MilestoneCategory;
+  icon: MilestoneIcon;
 }
 
-export const timelineData: TimelineItem[] = [
+export interface EvolutionStat {
+  id: string;
+  value: string;
+  label: string;
+  icon: "users" | "messages" | "heart" | "home";
+}
+
+export const HERO_IMAGE = {
+  src: "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwFwS4ZyMwmHblSjp50Dqc2EKQRFM8tirXvNLZ",
+  alt: "EST 2016 — The Beginning of SAPUK",
+} as const;
+
+export const HERO_COPY = {
+  eyebrow: "Our Journey",
+  title: "The Beginning of SAPUK",
+  description:
+    "Every step, every conversation, every life reached — our story is one of hope, resilience and community.",
+} as const;
+
+export const MILESTONE_FILTERS: { id: MilestoneFilter; label: string }[] = [
+  { id: "all", label: "All Milestones" },
+  { id: "growth", label: "Our Growth" },
+  { id: "impact", label: "Community Impact" },
+  { id: "moments", label: "Key Moments" },
+];
+
+export const timelineData: TimelineMilestone[] = [
   {
-    id: 1,
-    title: "The facts first",
+    id: "2016",
+    year: "2016",
+    title: "The Seed is Planted",
     content:
-      'SAPUK is a non profit suicide prevention CIC, founded in 2016 by Danielle Shaw after the devastating loss of Bryan Baron on 4 September 2016. For the full background on what happened that day, please refer to the blog "Seeing Suicide". Please note that this includes a trigger warning and may bring up distressing images. If you require support, please reach out.',
-    imageUrl:
-      "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwFwS4ZyMwmHblSjp50Dqc2EKQRFM8tirXvNLZ",
-    imageAlt: "est-2016",
+      "SAPUK begins after loss, with a simple belief: no one should face their darkest moments alone.",
+    category: "moments",
+    icon: "sprout",
   },
   {
-    id: 2,
-    title: "Volunteering with SAPUK",
+    id: "2017",
+    year: "2017",
+    title: "A Voice for Change",
     content:
-      '"SAPUK was never intended to become what it has. It started as a healing platform for my own trauma and, due to the correspondence, grew into a support network. It was needed for those people," as described in "Volunteering with SAPUK". SAPUK became what it is because of the support that we offer and, for the years that SAPUK has been afloat, we have guided countless people who have been, or are, struggling with suicidal ideation via our SAPChat service. This is a messaging line on Facebook and a phone line that operates weekly. At SAPUK we also have a recovery plan that people can enrol on with adequately trained members. This consists of a weekly phone call as well as access to our messaging line. "I became obsessed with preventing suicide. This became my life quite quickly after enduring the loss of suicide because I realised I was good at it. I was just 24 when I had to undergo the trauma, and 26 when we opened the SAPChat service. It all escalated more quickly than I developed my admin footing. After years of growth, confusion, approval, knock backs and realisation, we now have a stable and secure team running SAPUK, and it is amazing. We are so lucky. With me just running it and my ADHD traits, it had no chance. I will be here preventing suicide for as long as I breathe. It went from just me to now over 50 volunteers, and it is not because of me. It is because of what we can offer here: support, strength, care and compassion."',
-    imageUrl:
-      "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwmZhUMbxIA7eTQKzhPrZg86yfbNqMO1Fw9WUx",
-    imageAlt: "We are here - SAPUK",
+      "We start sharing stories, raising awareness, and opening conversations about suicide prevention.",
+    category: "impact",
+    icon: "megaphone",
   },
   {
-    id: 3,
-    title: "Suicide Rates",
+    id: "2018",
+    year: "2018",
+    title: "Building a Community",
     content:
-      "Suicide rates are the highest they have ever been and suicide has been the leading cause of death in men under the age of 45 for the last decade. We want to help reduce that number. SAPUK has a dedicated, selfless, voluntary team, running every day from 6 am to 11 pm. All volunteers have basic training, with many members building on this in different ways, and we have enough knowledge among us to be able to offer meaningful guidance. Thank you for taking the time to read this. The SAPUK team, supported by The Semicolon Shop.",
-    imageUrl:
-      "https://dju754gknh.ufs.sh/f/Uv1WD6etinpwjg0cXkU2sga69fPjWHmSeMVYkrxd0nlhZt3p",
-    imageAlt: "Suicide Rates - SAPUK",
+      "What began as one person's healing grows into a network of people supporting each other.",
+    category: "growth",
+    icon: "users",
+  },
+  {
+    id: "2019",
+    year: "2019",
+    title: "Expanding Support",
+    content:
+      "SAPChat launches and volunteering grows, bringing support to people across the UK.",
+    category: "growth",
+    icon: "message-circle",
+  },
+  {
+    id: "2021",
+    year: "2021",
+    title: "Growing Our Reach",
+    content:
+      "More volunteers join, more conversations happen, and more lives are gently held.",
+    category: "impact",
+    icon: "heart",
+  },
+  {
+    id: "2023",
+    year: "2023",
+    title: "Safe Spaces, Real Impact",
+    content:
+      "Physical community projects open, creating places where people can feel safe and supported.",
+    category: "impact",
+    icon: "home",
+  },
+  {
+    id: "today",
+    year: "Today & Beyond",
+    title: "Still Here. Still Listening.",
+    content:
+      "We keep evolving with compassion at the centre — present for whoever needs us next.",
+    category: "moments",
+    icon: "star",
   },
 ];
+
+export const FOUNDER_QUOTE = {
+  text: "We didn't just start SAPUK. We started a movement of hope.",
+  attribution: "Danielle Shaw, Founder",
+} as const;
+
+export const evolutionStats: EvolutionStat[] = [
+  {
+    id: "volunteers",
+    value: "50+",
+    label: "Active Volunteers Across the UK",
+    icon: "users",
+  },
+  {
+    id: "conversations",
+    value: "10,000+",
+    label: "Conversations Through SAPChat",
+    icon: "messages",
+  },
+  {
+    id: "lives",
+    value: "Thousands",
+    label: "Of Lives Supported Since 2016",
+    icon: "heart",
+  },
+  {
+    id: "spaces",
+    value: "Growing",
+    label: "Safe Spaces & Projects Across Communities",
+    icon: "home",
+  },
+];
+
+export const CTA_COPY = {
+  title: "Be part of our story",
+  description:
+    "Help us create a future where no one faces their darkest moments alone.",
+} as const;

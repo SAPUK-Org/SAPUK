@@ -1,13 +1,17 @@
-import MobileTimeline from "@/components/sapevolution/mobile-timeline";
-import DesktopTimeline from "@/components/sapevolution/desktop-timeline";
+import EvolutionCta from "@/components/sapevolution/EvolutionCta";
+import EvolutionHero from "@/components/sapevolution/EvolutionHero";
+import EvolutionStats from "@/components/sapevolution/EvolutionStats";
+import MilestoneTimeline from "@/components/sapevolution/MilestoneTimeline";
 
 export default function SapEvolution() {
   return (
-    <section className="bg-saphub-bg py-20 md:py-12 px-4 md:px-14">
-      <div className="container mx-auto max-w-7xl">
-        <MobileTimeline />
-        <DesktopTimeline />
+    <main className="bg-white px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 lg:gap-16">
+        <EvolutionHero />
+        <MilestoneTimeline />
+        <EvolutionStats />
+        <EvolutionCta />
       </div>
-    </section>
+    </main>
   );
 }

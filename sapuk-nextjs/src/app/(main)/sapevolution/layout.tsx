@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "SAP Evolution - SAP;UK",
-  description: "SAP Evolution - SAP;UK",
+  title: "The Beginning of SAPUK - SAP;UK",
+  description:
+    "Every step, every conversation, every life reached — the story of how SAPUK began and continues to grow.",
 };
 
 export default function SapEvolutionLayout({

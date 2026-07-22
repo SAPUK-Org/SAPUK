@@ -178,6 +178,14 @@ function RecurringServiceCard({
           <dd>{service.location}</dd>
         </div>
       </dl>
+      {service.href ? (
+        <a
+          href={service.href}
+          className="mt-4 inline-flex text-sm font-black text-violet-700 transition hover:text-violet-900 hover:underline"
+        >
+          View details →
+        </a>
+      ) : null}
     </article>
   );
 }

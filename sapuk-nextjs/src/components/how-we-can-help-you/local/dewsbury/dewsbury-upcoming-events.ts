@@ -25,6 +25,7 @@ export type DewsburyRecurringService = {
   location: string;
   accent: DewsburyAccent;
   icon: "shield" | "walk" | "games" | "pantry" | "virtual";
+  href?: string;
 };
 
 /** Year for fixed dates in the static copy. Update when dates are refreshed. */
@@ -124,10 +125,11 @@ export const DEWSBURY_RECURRING_SERVICES: DewsburyRecurringService[] = [
     title: "Virtual Safe Space",
     category: "Online support",
     detail:
-      "Remote safe-space support for people who cannot attend in person. Details coming soon.",
-    schedule: "Coming soon",
+      "Remote safe-space support for people who cannot attend in person. Book a Microsoft Teams or phone session.",
+    schedule: "Every Friday, 9:00am – 12:30pm",
     location: "Online",
     accent: "purple",
     icon: "virtual",
+    href: "/how-we-can-help-you/safe-spaces/virtual",
   },
 ];

@@ -19,6 +19,7 @@ export const dropdownItems: DropdownItem[] = [
     menuItems: [
       { href: "/how-we-can-help-you/projects", text: "Projects" },
       { href: "/how-we-can-help-you/local", text: "Local Services" },
+      { href: "/how-we-can-help-you/safe-spaces", text: "Safe Spaces" },
       { href: "/how-we-can-help-you/community", text: "Blogs/Community" },
       {
         href: "/how-we-can-help-you/downloadable-media",
@@ -63,6 +64,7 @@ export const footerLinkGroups: FooterLinkGroup[] = [
       { href: "/how-we-can-help-you/local", label: "Local services" },
       { href: "/how-we-can-help-you/local/dewsbury", label: "Dewsbury" },
       { href: "/how-we-can-help-you/local/lancashire", label: "Lancashire" },
+      { href: "/how-we-can-help-you/safe-spaces", label: "Safe Spaces" },
       { href: "/how-we-can-help-you/community", label: "Blogs & community" },
       {
         href: "/how-we-can-help-you/downloadable-media",
@@ -126,4 +128,6 @@ export const pageTitles: Record<string, string> = {
   "/fundraise": "Fundraising",
   "/fundraise/champs": "Fundraising Champs",
   "/bookings": "Bookings",
+  "/how-we-can-help-you/safe-spaces": "Safe Spaces",
+  "/how-we-can-help-you/safe-spaces/virtual": "Virtual Safe Spaces",
 };
